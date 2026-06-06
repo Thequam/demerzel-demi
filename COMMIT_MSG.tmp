@@ -1,0 +1,28 @@
+Add interactivity, Canvas rename, teal rebrand + metallic gunmetal
+
+Deepen the Demi prototype from a static UI into an interactive app driven
+by a Zustand store, rename Artifacts -> Canvas, drop in the Demerzel logo,
+and introduce brand teal #008B8B with a metallic gunmetal dark theme.
+
+Functionality:
+- Chat: composer sends real messages; token-streamed assistant replies with
+  model provenance + thinking; build-style prompts generate a live Canvas;
+  new-chat creation; auto-titling; auto-scroll
+- Model Manager: Pull animates real progress -> Installed; Load/Unload/Delete
+  mutate state and reflect in the model switcher
+- Cowork: Run now adds a running->success run; Active and Keep-awake toggles
+  persist; detail panel reflects live store state
+- Customize: Light/Dark/System retheme live; Local-only mode hides cloud
+  models; MCP Allow/Ask/Deny persists; provider keys + Ollama URL bound
+- Model switcher respects local-only mode and offers Pull
+
+Rebrand / design system:
+- New teal ramp (base #008B8B) + --brand-teal token + teal->turq->cyan
+  gradient (bg-brand-gradient-teal) on Canvas headers
+- Dark theme retuned to a cooler metallic gunmetal palette with a subtle
+  brushed-metal sheen (.metal-surface / .metal-rail) on rail + top bar
+- Uploaded Demerzel logo used in the rail brand area and favicon
+
+Rename: Artifacts -> Canvas across types, store, views, nav, components
+(CanvasView, CanvasPanel, CanvasDoc, canvasId, canvasCount). Shared Toggle
+primitive added to ui.tsx. Built with 4 additional subagents.

@@ -1,5 +1,4 @@
 import { useAppStore } from "@/store/useAppStore";
-import { conversations } from "@/data/mock";
 import { cn } from "@/lib/utils";
 import type { View } from "@/types";
 import { Badge, SectionLabel } from "@/components/ui";
@@ -24,7 +23,7 @@ const modes: { view: View; label: string; icon: React.ReactNode }[] = [
 
 const nav: { view: View; label: string; icon: React.ReactNode }[] = [
   { view: "projects", label: "Projects", icon: <FolderKanban size={18} /> },
-  { view: "artifacts", label: "Artifacts", icon: <LayoutPanelLeft size={18} /> },
+  { view: "canvas", label: "Canvas", icon: <LayoutPanelLeft size={18} /> },
   { view: "models", label: "Model Manager", icon: <Boxes size={18} /> },
   { view: "customize", label: "Customize", icon: <Settings2 size={18} /> },
 ];
@@ -63,14 +62,20 @@ function RailItem({
 
 export function LeftRail() {
   const { view, setView, activeConversationId, setActiveConversation } = useAppStore();
+  const conversations = useAppStore((s) => s.conversations);
+  const createConversation = useAppStore((s) => s.createConversation);
   const pinned = conversations.filter((c) => c.pinned);
   const recents = conversations.filter((c) => !c.pinned);
 
   return (
-    <aside className="flex w-[264px] shrink-0 flex-col border-r border-border bg-surface">
+    <aside className="metal-rail flex w-[264px] shrink-0 flex-col border-r border-border bg-surface">
       {/* Brand */}
       <div className="flex items-center gap-2.5 px-4 py-4">
-        <img src="/demi-mark.svg" alt="Demi" className="h-8 w-8 rounded-lg" />
+        <img
+          src="/demi-logo.png"
+          alt="Demerzel"
+          className="h-10 w-10 rounded-lg bg-white object-contain p-0.5 ring-1 ring-border"
+        />
         <div className="leading-tight">
           <div className="text-h3 font-bold tracking-tight">Demerzel</div>
           <div className="font-mono text-[10px] uppercase tracking-widest text-text-muted">
@@ -82,7 +87,7 @@ export function LeftRail() {
       {/* New */}
       <div className="px-3 pb-2">
         <button
-          onClick={() => setView("chat")}
+          onClick={() => createConversation()}
           className="flex w-full items-center gap-2 rounded-md border border-border-strong px-3 py-2 text-body font-medium text-text transition-colors hover:bg-bg-subtle"
         >
           <Plus size={16} /> New

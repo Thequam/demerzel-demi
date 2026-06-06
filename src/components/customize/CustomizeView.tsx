@@ -1,9 +1,13 @@
 import { useState } from "react";
-import type { Connector, Policy } from "@/types";
-import { connectors as mockConnectors } from "@/data/mock";
+import type { Connector, Policy, ConnectorTool } from "@/types";
 import { useAppStore } from "@/store/useAppStore";
-import { Card, Badge, SegmentedControl, SectionLabel } from "@/components/ui";
-import { Toggle } from "@/components/cowork/TaskCard";
+import {
+  Card,
+  Badge,
+  SegmentedControl,
+  SectionLabel,
+  Toggle,
+} from "@/components/ui";
 import { cn } from "@/lib/utils";
 import {
   Boxes,
@@ -14,12 +18,13 @@ import {
   Lock,
   Cpu,
   KeyRound,
+  WifiOff,
 } from "lucide-react";
 
 const GUN = "#6B7685";
 
 type Tab = "providers" | "ollama" | "appearance" | "privacy" | "connectors";
-type Appearance = "light" | "dark" | "system";
+type ThemePref = "light" | "dark" | "system";
 
 const TABS: { value: Tab; label: string; icon: React.ReactNode }[] = [
   { value: "providers", label: "Providers", icon: <Boxes size={16} /> },
@@ -41,11 +46,13 @@ function PanelHeader({ title, description }: { title: string; description: strin
 
 function TextInput({
   value,
+  onChange,
   placeholder,
   type = "text",
   ariaLabel,
 }: {
-  value?: string;
+  value: string;
+  onChange: (v: string) => void;
   placeholder?: string;
   type?: string;
   ariaLabel: string;
@@ -53,7 +60,8 @@ function TextInput({
   return (
     <input
       type={type}
-      defaultValue={value}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       aria-label={ariaLabel}
       className="h-9 w-full rounded-md border border-border bg-bg-subtle px-3 font-mono text-small text-text placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
@@ -62,14 +70,33 @@ function TextInput({
 }
 
 /* ---------------- Providers ---------------- */
-function ProviderRow({ name, placeholder }: { name: string; placeholder: string }) {
+function ProviderRow({
+  provider,
+  name,
+  placeholder,
+}: {
+  provider: string;
+  name: string;
+  placeholder: string;
+}) {
+  const key = useAppStore((s) => s.providerKeys[provider] ?? "");
+  const setProviderKey = useAppStore((s) => s.setProviderKey);
+
   return (
     <Card className="p-4">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-body font-medium text-text">{name}</span>
-        <Badge dotColor="var(--success)">connected</Badge>
+        <Badge dotColor={key ? "var(--success)" : GUN}>
+          {key ? "connected" : "not set"}
+        </Badge>
       </div>
-      <TextInput type="password" placeholder={placeholder} ariaLabel={`${name} API key`} />
+      <TextInput
+        type="password"
+        value={key}
+        onChange={(v) => setProviderKey(provider, v)}
+        placeholder={placeholder}
+        ariaLabel={`${name} API key`}
+      />
       <div className="mt-1.5 inline-flex items-center gap-1.5 text-caption text-text-muted">
         <Lock size={12} aria-hidden />
         Stored in OS keychain — never written to disk or synced.
@@ -86,9 +113,9 @@ function ProvidersPanel() {
         description="Add cloud providers and API keys, and set default models per mode."
       />
       <div className="flex flex-col gap-3">
-        <ProviderRow name="Anthropic" placeholder="sk-ant-…" />
-        <ProviderRow name="OpenAI" placeholder="sk-…" />
-        <ProviderRow name="Ollama Cloud" placeholder="ollama-…" />
+        <ProviderRow provider="anthropic" name="Anthropic" placeholder="sk-ant-…" />
+        <ProviderRow provider="openai" name="OpenAI" placeholder="sk-…" />
+        <ProviderRow provider="ollama-cloud" name="Ollama Cloud" placeholder="ollama-…" />
       </div>
       <div className="mt-4 flex items-start gap-2 rounded-md border border-border bg-bg-subtle px-3 py-2.5 text-caption text-text-secondary">
         <KeyRound size={14} className="mt-0.5 shrink-0" aria-hidden />
@@ -105,7 +132,10 @@ function ProvidersPanel() {
 
 /* ---------------- Ollama ---------------- */
 function OllamaPanel() {
+  const ollamaBaseUrl = useAppStore((s) => s.ollamaBaseUrl);
+  const setOllamaBaseUrl = useAppStore((s) => s.setOllamaBaseUrl);
   const [autoStart, setAutoStart] = useState(true);
+
   return (
     <div>
       <PanelHeader
@@ -115,7 +145,11 @@ function OllamaPanel() {
       <div className="flex flex-col gap-4">
         <div>
           <SectionLabel className="mb-1.5">Base URL</SectionLabel>
-          <TextInput value="http://localhost:11434/api" ariaLabel="Ollama base URL" />
+          <TextInput
+            value={ollamaBaseUrl}
+            onChange={setOllamaBaseUrl}
+            ariaLabel="Ollama base URL"
+          />
           <p className="mt-1.5 text-caption text-text-muted">
             Point at a remote host, or use{" "}
             <span className="font-mono">https://ollama.com/api</span> for cloud tags.
@@ -152,20 +186,8 @@ function OllamaPanel() {
 
 /* ---------------- Appearance ---------------- */
 function AppearancePanel() {
-  const theme = useAppStore((s) => s.theme);
-  const toggleTheme = useAppStore((s) => s.toggleTheme);
-  const [appearance, setAppearance] = useState<Appearance>(theme);
-
-  function apply(target: Appearance) {
-    setAppearance(target);
-    const resolved =
-      target === "system"
-        ? window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light"
-        : target;
-    if (resolved !== theme) toggleTheme();
-  }
+  const themePref = useAppStore((s) => s.themePref);
+  const setThemePref = useAppStore((s) => s.setThemePref);
 
   return (
     <div>
@@ -176,9 +198,9 @@ function AppearancePanel() {
             <div className="text-body font-medium text-text">Theme</div>
             <div className="text-caption text-text-muted">Light, dark, or follow the system.</div>
           </div>
-          <SegmentedControl<Appearance>
-            value={appearance}
-            onChange={apply}
+          <SegmentedControl<ThemePref>
+            value={themePref}
+            onChange={setThemePref}
             options={[
               { value: "light", label: "Light" },
               { value: "dark", label: "Dark" },
@@ -209,8 +231,10 @@ function AppearancePanel() {
 
 /* ---------------- Privacy ---------------- */
 function PrivacyPanel() {
-  const [telemetry, setTelemetry] = useState(false);
-  const [localOnly, setLocalOnly] = useState(false);
+  const telemetry = useAppStore((s) => s.telemetry);
+  const setTelemetry = useAppStore((s) => s.setTelemetry);
+  const localOnly = useAppStore((s) => s.localOnly);
+  const setLocalOnly = useAppStore((s) => s.setLocalOnly);
 
   return (
     <div>
@@ -234,15 +258,19 @@ function PrivacyPanel() {
             "flex items-center justify-between gap-3 p-4 transition-colors duration-200",
             localOnly && "ring-1"
           )}
-          style={localOnly ? ({ "--tw-ring-color": "var(--accent)" } as React.CSSProperties) : undefined}
+          style={
+            localOnly ? ({ "--tw-ring-color": "var(--accent)" } as React.CSSProperties) : undefined
+          }
         >
-          <div>
+          <div className="min-w-0">
             <div className="inline-flex items-center gap-2 text-body font-medium text-text">
+              <WifiOff size={15} aria-hidden />
               Local-only mode
               {localOnly && <Badge dotColor="var(--accent)">on</Badge>}
             </div>
             <div className="text-caption text-text-muted">
-              Disables all cloud calls — only local Ollama models can run.
+              Disables all cloud calls and hides cloud models in the model switcher — only local
+              Ollama models can run.
             </div>
           </div>
           <Toggle checked={localOnly} onChange={setLocalOnly} label="Local-only mode" />
@@ -260,25 +288,28 @@ const policyOptions: { value: Policy; label: string; color: string }[] = [
 ];
 
 function ToolRow({
-  name,
-  description,
-  policy,
+  tool,
   onChange,
 }: {
-  name: string;
-  description: string;
-  policy: Policy;
+  tool: ConnectorTool;
   onChange: (p: Policy) => void;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-bg-subtle px-3 py-2.5">
       <div className="min-w-0">
-        <div className="font-mono text-small text-text">{name}</div>
-        <div className="text-caption text-text-muted">{description}</div>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-small text-text">{tool.name}</span>
+          {tool.readOnly ? (
+            <Badge dotColor="var(--info)">read-only</Badge>
+          ) : (
+            <Badge dotColor="var(--warning)">state-changing</Badge>
+          )}
+        </div>
+        <div className="text-caption text-text-muted">{tool.description}</div>
       </div>
       <SegmentedControl<Policy>
         size="sm"
-        value={policy}
+        value={tool.policy}
         onChange={onChange}
         options={policyOptions}
       />
@@ -292,7 +323,7 @@ function ConnectorCard({
   onSetPolicy,
 }: {
   connector: Connector;
-  onToggleEnabled: (enabled: boolean) => void;
+  onToggleEnabled: () => void;
   onSetPolicy: (toolName: string, policy: Policy) => void;
 }) {
   const readOnly = connector.tools.filter((t) => t.readOnly);
@@ -319,13 +350,7 @@ function ConnectorCard({
           <div className="flex flex-col gap-2">
             <SectionLabel>Read-only tools</SectionLabel>
             {readOnly.map((t) => (
-              <ToolRow
-                key={t.name}
-                name={t.name}
-                description={t.description}
-                policy={t.policy}
-                onChange={(p) => onSetPolicy(t.name, p)}
-              />
+              <ToolRow key={t.name} tool={t} onChange={(p) => onSetPolicy(t.name, p)} />
             ))}
           </div>
         )}
@@ -333,13 +358,7 @@ function ConnectorCard({
           <div className="flex flex-col gap-2">
             <SectionLabel>State-changing tools · needs approval</SectionLabel>
             {writeTools.map((t) => (
-              <ToolRow
-                key={t.name}
-                name={t.name}
-                description={t.description}
-                policy={t.policy}
-                onChange={(p) => onSetPolicy(t.name, p)}
-              />
+              <ToolRow key={t.name} tool={t} onChange={(p) => onSetPolicy(t.name, p)} />
             ))}
           </div>
         )}
@@ -349,21 +368,9 @@ function ConnectorCard({
 }
 
 function ConnectorsPanel() {
-  const [conns, setConns] = useState<Connector[]>(() =>
-    mockConnectors.map((c) => ({ ...c, tools: c.tools.map((t) => ({ ...t })) }))
-  );
-
-  const setEnabled = (id: string, enabled: boolean) =>
-    setConns((prev) => prev.map((c) => (c.id === id ? { ...c, enabled } : c)));
-
-  const setPolicy = (id: string, toolName: string, policy: Policy) =>
-    setConns((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? { ...c, tools: c.tools.map((t) => (t.name === toolName ? { ...t, policy } : t)) }
-          : c
-      )
-    );
+  const connectors = useAppStore((s) => s.connectors);
+  const toggleConnector = useAppStore((s) => s.toggleConnector);
+  const setToolPolicy = useAppStore((s) => s.setToolPolicy);
 
   return (
     <div>
@@ -372,12 +379,12 @@ function ConnectorsPanel() {
         description="Manage MCP servers and set per-tool Allow / Ask / Deny permissions."
       />
       <div className="flex flex-col gap-4">
-        {conns.map((c) => (
+        {connectors.map((c) => (
           <ConnectorCard
             key={c.id}
             connector={c}
-            onToggleEnabled={(enabled) => setEnabled(c.id, enabled)}
-            onSetPolicy={(toolName, policy) => setPolicy(c.id, toolName, policy)}
+            onToggleEnabled={() => toggleConnector(c.id)}
+            onSetPolicy={(toolName, policy) => setToolPolicy(c.id, toolName, policy)}
           />
         ))}
       </div>

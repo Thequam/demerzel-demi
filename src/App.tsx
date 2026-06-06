@@ -6,7 +6,7 @@ import { CoworkView } from "@/components/cowork/CoworkView";
 import { CodeView } from "@/components/code/CodeView";
 import { ModelsView } from "@/components/models/ModelsView";
 import { ProjectsView } from "@/components/projects/ProjectsView";
-import { ArtifactsView } from "@/components/artifacts/ArtifactsView";
+import { CanvasView } from "@/components/canvas/CanvasView";
 import { CustomizeView } from "@/components/customize/CustomizeView";
 
 export default function App() {
@@ -23,7 +23,7 @@ export default function App() {
           {view === "code" && <CodeView />}
           {view === "models" && <ModelsView />}
           {view === "projects" && <ProjectsView />}
-          {view === "artifacts" && <ArtifactsView />}
+          {view === "canvas" && <CanvasView />}
           {view === "customize" && <CustomizeView />}
         </div>
       </main>

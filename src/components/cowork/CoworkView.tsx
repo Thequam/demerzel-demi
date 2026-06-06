@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { cn, relativeTime } from "@/lib/utils";
-import type { Artifact, ScheduledTask } from "@/types";
-import { tasks as mockTasks, projects, sampleArtifact } from "@/data/mock";
+import type { CanvasDoc } from "@/types";
+import { projects, sampleCanvas } from "@/data/mock";
+import { useAppStore } from "@/store/useAppStore";
 import {
   Badge,
   Button,
@@ -22,9 +23,9 @@ import {
   Sparkles,
 } from "lucide-react";
 
-/* ---------------- Live artifacts mock ---------------- */
-const liveArtifacts: Artifact[] = [
-  sampleArtifact,
+/* ---------------- Live canvases mock ---------------- */
+const liveCanvases: CanvasDoc[] = [
+  sampleCanvas,
   {
     id: "art-live-2",
     title: "Competitor Digest",
@@ -126,8 +127,8 @@ function ProjectSelector({
   );
 }
 
-/* ---------------- Live artifact card ---------------- */
-function LiveArtifactCard({ artifact }: { artifact: Artifact }) {
+/* ---------------- Live canvas card ---------------- */
+function LiveCanvasCard({ canvas }: { canvas: CanvasDoc }) {
   return (
     <Card className="flex items-center gap-3 p-3 transition-colors duration-200 hover:border-border-strong animate-fade-in">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-brand-gradient text-white">
@@ -135,15 +136,15 @@ function LiveArtifactCard({ artifact }: { artifact: Artifact }) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="truncate text-small font-medium text-text">{artifact.title}</span>
+          <span className="truncate text-small font-medium text-text">{canvas.title}</span>
           <span className="inline-flex items-center gap-1 text-caption text-info">
             <Radio size={11} className="animate-live-pulse" />
             Live
           </span>
         </div>
         <div className="mt-0.5 flex items-center gap-2 text-caption text-text-muted">
-          <Badge>v{artifact.version}</Badge>
-          <span className="font-mono tabular">{relativeTime(artifact.updatedAt)}</span>
+          <Badge>v{canvas.version}</Badge>
+          <span className="font-mono tabular">{relativeTime(canvas.updatedAt)}</span>
         </div>
       </div>
     </Card>
@@ -152,19 +153,14 @@ function LiveArtifactCard({ artifact }: { artifact: Artifact }) {
 
 /* ---------------- CoworkView ---------------- */
 export function CoworkView() {
-  const [taskList, setTaskList] = useState<ScheduledTask[]>(mockTasks);
-  const [selectedId, setSelectedId] = useState<string | null>(mockTasks[0]?.id ?? null);
+  const tasks = useAppStore((s) => s.tasks);
+  const [selectedId, setSelectedId] = useState<string | null>(tasks[0]?.id ?? null);
   const [composerValue, setComposerValue] = useState("");
   const [focused, setFocused] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
 
-  const selectedTask = taskList.find((t) => t.id === selectedId) ?? null;
-
-  const setActive = (id: string, next: boolean) =>
-    setTaskList((list) => list.map((t) => (t.id === id ? { ...t, active: next } : t)));
-
-  const setKeepAwake = (id: string, next: boolean) =>
-    setTaskList((list) => list.map((t) => (t.id === id ? { ...t, keepAwake: next } : t)));
+  // Look the selected task up from the live store list so toggles + new runs appear immediately.
+  const selectedTask = tasks.find((t) => t.id === selectedId) ?? null;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -210,13 +206,12 @@ export function CoworkView() {
             {/* Left: scheduled tasks */}
             <div className="flex flex-col gap-3">
               <SectionLabel>Scheduled tasks</SectionLabel>
-              {taskList.map((task) => (
+              {tasks.map((task) => (
                 <TaskCard
                   key={task.id}
                   task={task}
                   selected={task.id === selectedId}
                   onSelect={() => setSelectedId(task.id)}
-                  onToggleActive={(next) => setActive(task.id, next)}
                 />
               ))}
             </div>
@@ -224,12 +219,7 @@ export function CoworkView() {
             {/* Right: detail panel */}
             <Card className="p-5">
               {selectedTask ? (
-                <RunHistory
-                  key={selectedTask.id}
-                  task={selectedTask}
-                  onToggleKeepAwake={(next) => setKeepAwake(selectedTask.id, next)}
-                  onRunNow={() => {}}
-                />
+                <RunHistory task={selectedTask} />
               ) : (
                 <EmptyState
                   icon={<Sparkles size={28} />}
@@ -240,15 +230,15 @@ export function CoworkView() {
             </Card>
           </div>
 
-          {/* Live artifacts */}
+          {/* Live canvas */}
           <section className="mt-10">
             <div className="flex items-center gap-2">
               <StatusDot status="running" />
-              <SectionLabel>Live artifacts</SectionLabel>
+              <SectionLabel>Live canvas</SectionLabel>
             </div>
             <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {liveArtifacts.map((a) => (
-                <LiveArtifactCard key={a.id} artifact={a} />
+              {liveCanvases.map((canvas) => (
+                <LiveCanvasCard key={canvas.id} canvas={canvas} />
               ))}
             </div>
           </section>

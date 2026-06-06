@@ -6,7 +6,7 @@ import type {
   FileNode,
   CodeSession,
   Connector,
-  Artifact,
+  CanvasDoc,
 } from "@/types";
 
 const ago = (mins: number) => new Date(Date.now() - mins * 60000);
@@ -154,7 +154,7 @@ export const models: Model[] = [
   },
 ];
 
-export const sampleArtifact: Artifact = {
+export const sampleCanvas: CanvasDoc = {
   id: "art-1",
   title: "Quarterly Revenue Dashboard",
   type: "html",
@@ -200,10 +200,10 @@ export const conversations: Conversation[] = [
         effort: "High",
         createdAt: ago(11),
         thinking:
-          "The user wants a self-contained HTML dashboard. I'll parse the columns (mrr, logos, retention), pick the brand gradient for accents, and emit three KPI cards with progress bars. Keeping it single-file so it renders in the artifact panel.",
+          "The user wants a self-contained HTML dashboard. I'll parse the columns (mrr, logos, retention), pick the brand gradient for accents, and emit three KPI cards with progress bars. Keeping it single-file so it renders in the canvas panel.",
         content:
-          "Here's an interactive revenue dashboard. I pulled MRR, new logos, and net retention into KPI cards with progress bars, styled with the Demi brand gradient. Open the artifact panel to preview it live — you can download it as a single HTML file or open it in your browser.",
-        artifactId: "art-1",
+          "Here's an interactive revenue dashboard. I pulled MRR, new logos, and net retention into KPI cards with progress bars, styled with the Demi brand gradient. Open the canvas panel to preview it live — you can download it as a single HTML file or open it in your browser.",
+        canvasId: "art-1",
       },
       {
         id: "m3",
@@ -251,7 +251,7 @@ export const projects: Project[] = [
     defaultModel: "qwen3-coder-next",
     updatedAt: ago(45),
     chatCount: 12,
-    artifactCount: 5,
+    canvasCount: 5,
   },
   {
     id: "p2",
@@ -260,7 +260,7 @@ export const projects: Project[] = [
     defaultModel: "deepseek-v3.2",
     updatedAt: ago(900),
     chatCount: 7,
-    artifactCount: 9,
+    canvasCount: 9,
   },
   {
     id: "p3",
@@ -270,7 +270,7 @@ export const projects: Project[] = [
     defaultModel: "gemma4:27b",
     updatedAt: ago(2880),
     chatCount: 4,
-    artifactCount: 2,
+    canvasCount: 2,
   },
 ];
 
@@ -442,3 +442,41 @@ export const heatmap: number[][] = Array.from({ length: 7 }, (_, r) =>
     return seed > 7 ? 4 : seed > 5 ? 3 : seed > 3 ? 2 : seed > 1 ? 1 : 0;
   })
 );
+
+// Shared canvas documents (generated outputs) used by the Canvas gallery + panel
+export const canvasDocs: CanvasDoc[] = [
+  sampleCanvas,
+  {
+    id: "art-2",
+    title: "Getting Started Guide",
+    type: "markdown",
+    version: 2,
+    updatedAt: ago(35),
+    content: "# Getting Started\n\nRun any Ollama model in a first-class agent harness.",
+  },
+  {
+    id: "art-3",
+    title: "useDebounce hook",
+    type: "code",
+    version: 1,
+    updatedAt: ago(120),
+    content: "export function useDebounce<T>(value: T, ms: number) { /* … */ }",
+  },
+  {
+    id: "art-4",
+    title: "Orbit Logo Mark",
+    type: "svg",
+    version: 4,
+    updatedAt: ago(540),
+    content: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="20"/></svg>',
+  },
+  {
+    id: "art-5",
+    title: "Agent Loop Flow",
+    type: "mermaid",
+    version: 1,
+    live: true,
+    updatedAt: ago(4),
+    content: "flowchart LR\n  A[Prompt] --> B[Tool call] --> C[Result]",
+  },
+];

@@ -36,7 +36,7 @@ function ProjectCard({ project }: { project: Project }) {
           </span>
           <span className="inline-flex items-center gap-1">
             <FileText size={13} aria-hidden />
-            <span className="font-mono tabular">{project.artifactCount}</span> artifacts
+            <span className="font-mono tabular">{project.canvasCount}</span> canvases
           </span>
         </div>
         <Button variant="secondary" size="sm">
@@ -55,7 +55,7 @@ export function ProjectsView() {
         <div>
           <h1 className="text-h2 text-text">Projects</h1>
           <p className="text-small text-text-secondary">
-            Managed containers for chats and artifacts. Open one as a real folder on disk.
+            Managed containers for chats and canvases. Open one as a real folder on disk.
           </p>
         </div>
         <Button size="sm">

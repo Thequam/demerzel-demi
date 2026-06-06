@@ -25,6 +25,11 @@ export default {
           400: "#1AC2E6", 500: "#06A6CC", 600: "#0585A6", 700: "#066780",
           800: "#064E60", 900: "#053744",
         },
+        teal: {
+          50: "#E6F7F7", 100: "#C2ECEC", 200: "#8FDCDC", 300: "#54C7C7",
+          400: "#1FACAC", 500: "#008B8B", 600: "#007373", 700: "#075C5C",
+          800: "#094A4A", 900: "#0A3838",
+        },
         gun: {
           50: "#F1F3F5", 100: "#DDE1E6", 200: "#BBC2CB", 300: "#939DAA",
           400: "#6B7685", 500: "#4A5563", 600: "#39424E", 700: "#2B323B",
@@ -59,6 +64,8 @@ export default {
         "primary-fg": "var(--primary-fg)",
         accent: "var(--accent)",
         "accent-fg": "var(--accent-fg)",
+        "brand-teal": "var(--brand-teal)",
+        "brand-teal-fg": "var(--brand-teal-fg)",
         link: "var(--link)",
         success: "var(--success)",
         info: "var(--info)",
@@ -91,6 +98,7 @@ export default {
       },
       backgroundImage: {
         "brand-gradient": "linear-gradient(135deg, #4154D6 0%, #1E6FE0 50%, #43D8F7 100%)",
+        "brand-gradient-teal": "linear-gradient(135deg, #008B8B 0%, #0FB39A 50%, #43D8F7 100%)",
       },
       transitionTimingFunction: {
         enter: "cubic-bezier(0.2, 0, 0, 1)",

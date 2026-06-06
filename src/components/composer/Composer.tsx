@@ -1,17 +1,36 @@
 import { useState } from "react";
 import { ModelSwitcher } from "./ModelSwitcher";
+import { useAppStore } from "@/store/useAppStore";
 import { cn } from "@/lib/utils";
-import { Plus, Mic, ArrowUp, PenLine, GraduationCap, FolderOpen } from "lucide-react";
+import { Plus, Mic, ArrowUp, Square, PenLine, GraduationCap, FolderOpen } from "lucide-react";
 
 const quickActions = [
-  { icon: <PenLine size={14} />, label: "Write" },
-  { icon: <GraduationCap size={14} />, label: "Learn" },
-  { icon: <FolderOpen size={14} />, label: "From Folder" },
+  { icon: <PenLine size={14} />, label: "Write", prompt: "Write a short product update announcing Demi's local-first agent harness." },
+  { icon: <GraduationCap size={14} />, label: "Learn", prompt: "Explain how mixture-of-experts routing works, simply." },
+  { icon: <FolderOpen size={14} />, label: "From Folder", prompt: "Build a usage dashboard from the metrics in my project folder." },
 ];
 
 export function Composer({ placeholder = "Message Demi…" }: { placeholder?: string }) {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
+  const sendMessage = useAppStore((s) => s.sendMessage);
+  const streaming = useAppStore((s) => s.streamingConvoId != null);
+
+  const submit = (text?: string) => {
+    const payload = (text ?? value).trim();
+    if (!payload || streaming) return;
+    sendMessage(payload);
+    setValue("");
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submit();
+    }
+  };
+
+  const canSend = value.trim().length > 0 && !streaming;
 
   return (
     <div className="px-4 pb-4 pt-2">
@@ -25,10 +44,11 @@ export function Composer({ placeholder = "Message Demi…" }: { placeholder?: st
           <textarea
             value={value}
             onChange={(e) => setValue(e.target.value)}
+            onKeyDown={onKeyDown}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             rows={2}
-            placeholder={placeholder}
+            placeholder={streaming ? "Demi is responding…" : placeholder}
             className="w-full resize-none bg-transparent px-4 pt-3 text-body text-text outline-none placeholder:text-text-muted"
           />
           <div className="flex items-center gap-2 px-3 pb-2.5">
@@ -41,14 +61,17 @@ export function Composer({ placeholder = "Message Demi…" }: { placeholder?: st
             <div className="ml-auto flex items-center gap-2">
               <ModelSwitcher />
               <button
+                onClick={() => submit()}
+                disabled={!canSend}
+                aria-label="Send message"
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-full transition-colors",
-                  value.trim()
+                  canSend
                     ? "bg-primary text-primary-fg hover:bg-primary-hover"
                     : "bg-bg-subtle text-text-muted"
                 )}
               >
-                <ArrowUp size={17} />
+                {streaming ? <Square size={14} /> : <ArrowUp size={17} />}
               </button>
             </div>
           </div>
@@ -59,7 +82,9 @@ export function Composer({ placeholder = "Message Demi…" }: { placeholder?: st
           {quickActions.map((q) => (
             <button
               key={q.label}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-caption text-text-secondary transition-colors hover:bg-bg-subtle hover:text-text"
+              onClick={() => submit(q.prompt)}
+              disabled={streaming}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-caption text-text-secondary transition-colors hover:bg-bg-subtle hover:text-text disabled:opacity-40"
             >
               {q.icon}
               {q.label}

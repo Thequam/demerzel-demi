@@ -8,7 +8,7 @@ const titles: Record<View, string> = {
   cowork: "Cowork",
   code: "Code",
   projects: "Projects",
-  artifacts: "Artifacts",
+  canvas: "Canvas",
   models: "Model Manager",
   customize: "Customize",
 };
@@ -18,16 +18,16 @@ const subtitles: Partial<Record<View, string>> = {
   cowork: "Agentic and scheduled tasks that knock things off your list",
   code: "Coding-agent sessions bound to a real folder on disk",
   projects: "Managed containers you can open as a real folder",
-  artifacts: "Generated HTML, docs, code, and live dashboards",
+  canvas: "Generated HTML, docs, code, and live dashboards",
   models: "Browse, pull, inspect, and manage local and cloud models",
   customize: "Providers, connectors, appearance, and privacy",
 };
 
 export function TopBar() {
-  const { view, theme, toggleTheme, artifactPanelOpen, toggleArtifactPanel } = useAppStore();
+  const { view, theme, toggleTheme, canvasPanelOpen, toggleCanvasPanel } = useAppStore();
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface/80 px-5 backdrop-blur">
+    <header className="metal-surface flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface/80 px-5 backdrop-blur">
       <div className="min-w-0">
         <h1 className="truncate text-h3 font-semibold leading-5">{titles[view]}</h1>
         {subtitles[view] && (
@@ -41,10 +41,10 @@ export function TopBar() {
         </Badge>
         {view === "chat" && (
           <IconButton
-            active={artifactPanelOpen}
-            onClick={() => toggleArtifactPanel()}
-            aria-label="Toggle artifact panel"
-            title="Toggle artifact panel"
+            active={canvasPanelOpen}
+            onClick={() => toggleCanvasPanel()}
+            aria-label="Toggle canvas panel"
+            title="Toggle canvas panel"
           >
             <PanelRight size={17} />
           </IconButton>

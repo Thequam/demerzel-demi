@@ -4,7 +4,7 @@ export type View =
   | "cowork"
   | "code"
   | "projects"
-  | "artifacts"
+  | "canvas"
   | "models"
   | "customize";
 
@@ -30,7 +30,7 @@ export interface Model {
 
 export type Effort = "Low" | "Medium" | "High";
 
-export interface Artifact {
+export interface CanvasDoc {
   id: string;
   title: string;
   type: "html" | "markdown" | "code" | "svg" | "mermaid";
@@ -48,7 +48,8 @@ export interface ChatMessage {
   modelId?: string;
   effort?: Effort;
   createdAt: Date;
-  artifactId?: string;
+  canvasId?: string;
+  streaming?: boolean;
 }
 
 export interface Conversation {
@@ -69,7 +70,7 @@ export interface Project {
   defaultModel: string;
   updatedAt: Date;
   chatCount: number;
-  artifactCount: number;
+  canvasCount: number;
 }
 
 export type RunStatus = "success" | "warn" | "fail" | "running";

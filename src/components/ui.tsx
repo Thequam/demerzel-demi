@@ -244,6 +244,50 @@ export function SectionLabel({ children, className }: { children: React.ReactNod
   );
 }
 
+/* ---------------- Toggle (switch) ---------------- */
+export function Toggle({
+  checked,
+  onChange,
+  label,
+  disabled,
+  size = "md",
+}: {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+  label?: string;
+  disabled?: boolean;
+  size?: "sm" | "md";
+}) {
+  const w = size === "sm" ? "h-4 w-7" : "h-5 w-9";
+  const knob = size === "sm" ? "h-3 w-3" : "h-4 w-4";
+  const shift = size === "sm" ? "translate-x-3" : "translate-x-4";
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      disabled={disabled}
+      onClick={() => onChange(!checked)}
+      className={cn(
+        "relative inline-flex shrink-0 items-center rounded-full transition-colors duration-200",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring",
+        "disabled:opacity-40 disabled:pointer-events-none",
+        w,
+        checked ? "bg-primary" : "bg-border-strong"
+      )}
+    >
+      <span
+        className={cn(
+          "inline-block transform rounded-full bg-white shadow-sm transition-transform duration-200",
+          knob,
+          checked ? shift : "translate-x-0.5"
+        )}
+      />
+    </button>
+  );
+}
+
 /* ---------------- Empty state ---------------- */
 export function EmptyState({
   icon,

@@ -1,7 +1,7 @@
 import { cn, relativeTime } from "@/lib/utils";
 import type { ScheduledTask, TaskRun } from "@/types";
-import { Button, Card, SectionLabel } from "@/components/ui";
-import { Toggle } from "./TaskCard";
+import { Button, Card, SectionLabel, Toggle } from "@/components/ui";
+import { useAppStore } from "@/store/useAppStore";
 import { AlertTriangle, Play, XCircle } from "lucide-react";
 
 function formatDuration(ms: number): string {
@@ -38,15 +38,12 @@ const statusLabel: Record<TaskRun["status"], string> = {
 };
 
 /* ---------------- RunHistory ---------------- */
-export function RunHistory({
-  task,
-  onToggleKeepAwake,
-  onRunNow,
-}: {
-  task: ScheduledTask;
-  onToggleKeepAwake: (next: boolean) => void;
-  onRunNow: () => void;
-}) {
+export function RunHistory({ task }: { task: ScheduledTask }) {
+  const toggleTaskKeepAwake = useAppStore((s) => s.toggleTaskKeepAwake);
+  const runTaskNow = useAppStore((s) => s.runTaskNow);
+
+  const isRunning = task.runs[0]?.status === "running";
+
   return (
     <div className="flex min-h-0 flex-col gap-5">
       {/* Header */}
@@ -68,7 +65,7 @@ export function RunHistory({
         <div className="flex items-center gap-2.5">
           <Toggle
             checked={task.keepAwake}
-            onChange={onToggleKeepAwake}
+            onChange={() => toggleTaskKeepAwake(task.id)}
             label="Keep awake"
           />
           <div>
@@ -76,7 +73,12 @@ export function RunHistory({
             <div className="text-caption text-text-muted">Run while the machine is awake</div>
           </div>
         </div>
-        <Button variant="primary" size="md" onClick={onRunNow}>
+        <Button
+          variant="primary"
+          size="md"
+          onClick={() => runTaskNow(task.id)}
+          disabled={isRunning}
+        >
           <Play size={15} />
           Run now
         </Button>
@@ -86,26 +88,30 @@ export function RunHistory({
       <section className="flex min-h-0 flex-1 flex-col">
         <SectionLabel>History</SectionLabel>
         <ul className="mt-2 space-y-2 overflow-y-auto">
-          {task.runs.map((run) => (
-            <li key={run.id}>
-              <Card className="flex items-start gap-3 p-3 animate-fade-in">
-                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center">
-                  <RunGlyph status={run.status} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-small font-medium text-text">
-                      {statusLabel[run.status]}
-                    </span>
-                    <span className="shrink-0 font-mono tabular text-caption text-text-muted">
-                      {relativeTime(run.startedAt)} · {formatDuration(run.durationMs)}
-                    </span>
+          {task.runs.map((run) => {
+            const finished = run.status !== "running";
+            return (
+              <li key={run.id}>
+                <Card className="flex items-start gap-3 p-3 animate-fade-in">
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center">
+                    <RunGlyph status={run.status} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-small font-medium text-text">
+                        {statusLabel[run.status]}
+                      </span>
+                      <span className="shrink-0 font-mono tabular text-caption text-text-muted">
+                        {relativeTime(run.startedAt)}
+                        {finished && ` · ${formatDuration(run.durationMs)}`}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-small text-text-secondary">{run.summary}</p>
                   </div>
-                  <p className="mt-0.5 text-small text-text-secondary">{run.summary}</p>
-                </div>
-              </Card>
-            </li>
-          ))}
+                </Card>
+              </li>
+            );
+          })}
         </ul>
       </section>
     </div>

@@ -1,60 +1,20 @@
 import { cn } from "@/lib/utils";
 import type { ScheduledTask } from "@/types";
-import { Card, Pill, StatusDot } from "@/components/ui";
+import { Card, Pill, StatusDot, Toggle } from "@/components/ui";
+import { useAppStore } from "@/store/useAppStore";
 import { CalendarClock } from "lucide-react";
-
-/* ---------------- Toggle (shared custom switch) ---------------- */
-export function Toggle({
-  checked,
-  onChange,
-  label,
-  className,
-}: {
-  checked: boolean;
-  onChange: (next: boolean) => void;
-  label: string;
-  className?: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-pressed={checked}
-      aria-label={label}
-      onClick={(e) => {
-        e.stopPropagation();
-        onChange(!checked);
-      }}
-      className={cn(
-        "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200 ease-enter",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
-        checked ? "bg-primary" : "bg-border-strong",
-        className
-      )}
-    >
-      <span
-        className={cn(
-          "inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ease-enter",
-          checked ? "translate-x-[18px]" : "translate-x-[3px]"
-        )}
-      />
-    </button>
-  );
-}
 
 /* ---------------- TaskCard ---------------- */
 export function TaskCard({
   task,
   selected,
   onSelect,
-  onToggleActive,
 }: {
   task: ScheduledTask;
   selected: boolean;
   onSelect: () => void;
-  onToggleActive: (next: boolean) => void;
 }) {
+  const toggleTaskActive = useAppStore((s) => s.toggleTaskActive);
   const runCount = task.runs.length;
 
   return (
@@ -87,11 +47,17 @@ export function TaskCard({
             </Pill>
           </div>
         </div>
-        <Toggle
-          checked={task.active}
-          onChange={onToggleActive}
-          label={`Toggle ${task.name} active`}
-        />
+        {/* Stop propagation so toggling Active does not also select the card */}
+        <span
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <Toggle
+            checked={task.active}
+            onChange={() => toggleTaskActive(task.id)}
+            label={`Toggle ${task.name} active`}
+          />
+        </span>
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2">

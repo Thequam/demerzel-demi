@@ -1,22 +1,19 @@
 import { useState } from "react";
-import { models } from "@/data/mock";
-import { ModelCard, type PullState } from "./ModelCard";
+import { useAppStore } from "@/store/useAppStore";
+import { ModelCard } from "./ModelCard";
 import { SegmentedControl, Pill, EmptyState } from "@/components/ui";
 import { Search, Cpu, PackageSearch } from "lucide-react";
 
 type Filter = "all" | "local" | "cloud";
 
-const PULLS: Record<string, PullState> = {
-  "minimax-m2.5": {
-    percent: 62,
-    caption: "74 GB / 120 GB · ~6m left",
-    layer: "pulling 7 of 11 layers · sha256:9f3a1c…",
-  },
-};
-
 export function ModelsView() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+
+  const models = useAppStore((s) => s.models);
+
+  const loadedCount = models.filter((m) => m.installState === "loaded").length;
+  const installedCount = models.filter((m) => m.installState === "installed").length;
 
   const q = query.trim().toLowerCase();
   const filtered = models.filter((m) => {
@@ -67,6 +64,10 @@ export function ModelsView() {
               { value: "cloud", label: "Cloud" },
             ]}
           />
+          <span className="ml-auto text-caption text-text-muted">
+            <span className="font-mono tabular text-text-secondary">{loadedCount}</span> loaded ·{" "}
+            <span className="font-mono tabular text-text-secondary">{installedCount}</span> installed
+          </span>
         </div>
       </header>
 
@@ -80,7 +81,7 @@ export function ModelsView() {
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filtered.map((m) => (
-              <ModelCard key={m.id} model={m} pull={PULLS[m.id]} />
+              <ModelCard key={m.id} model={m} />
             ))}
           </div>
         )}

@@ -17,6 +17,8 @@
   --primary-fg: #FFFFFF;
   --accent: #C29318;
   --accent-fg: #13171C;
+  --brand-teal: #008B8B;
+  --brand-teal-fg: #FFFFFF;
   --link: #135BBF;
   --success: #0FB39A;
   --info: #1E6FE0;
@@ -26,12 +28,12 @@
 }
 
 [data-theme="dark"] {
-  --bg: #13171C;
-  --bg-subtle: #0B0E11;
-  --surface: #1E232A;
-  --surface-raised: #2B323B;
-  --border: #2B323B;
-  --border-strong: #39424E;
+  --bg: #161A20;
+  --bg-subtle: #0E1116;
+  --surface: #20262E;
+  --surface-raised: #2A323C;
+  --border: #333C47;
+  --border-strong: #44505D;
   --text: #F2F4F6;
   --text-secondary: #BBC2CB;
   --text-muted: #6B7685;
@@ -40,6 +42,8 @@
   --primary-fg: #13171C;
   --accent: #E3C158;
   --accent-fg: #13171C;
+  --brand-teal: #1FACAC;
+  --brand-teal-fg: #0A3838;
   --link: #6BA8FF;
   --success: #54DCC6;
   --info: #6BA8FF;
@@ -81,6 +85,32 @@ body {
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); background-clip: padding-box; }
+
+/* Brushed gunmetal sheen for dark mode surfaces. No-op in light mode. */
+.metal-surface,
+.metal-rail {
+  background-image: none;
+}
+
+[data-theme="dark"] .metal-surface {
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0) 18%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .metal-rail {
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.18);
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

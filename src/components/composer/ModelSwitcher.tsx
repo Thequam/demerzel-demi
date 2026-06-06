@@ -1,17 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { models } from "@/data/mock";
+import type { Model } from "@/types";
 import { cn } from "@/lib/utils";
 import { CapabilityBadges } from "@/components/ui";
-import { Search, Check, Download, CircleDot, AlertTriangle, ChevronDown } from "lucide-react";
+import { Search, Check, Download, CircleDot, AlertTriangle, ChevronDown, ShieldCheck } from "lucide-react";
 
 export function ModelSwitcher() {
   const { activeModelId, setModel, effort, setEffort, modelSwitcherOpen, toggleModelSwitcher } =
     useAppStore();
+  const models = useAppStore((s) => s.models);
+  const localOnly = useAppStore((s) => s.localOnly);
+  const pullModel = useAppStore((s) => s.pullModel);
   const [query, setQuery] = useState("");
   const ref = useRef<HTMLDivElement>(null);
 
-  const active = models.find((m) => m.id === activeModelId)!;
+  const active = models.find((m) => m.id === activeModelId) ?? models[0];
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -25,7 +28,7 @@ export function ModelSwitcher() {
     (m.name + m.provider).toLowerCase().includes(query.toLowerCase())
   );
   const local = filtered.filter((m) => m.kind === "local");
-  const cloud = filtered.filter((m) => m.kind === "cloud");
+  const cloud = localOnly ? [] : filtered.filter((m) => m.kind === "cloud");
 
   return (
     <div className="relative" ref={ref}>
@@ -85,8 +88,14 @@ export function ModelSwitcher() {
           </div>
 
           <div className="max-h-[340px] overflow-y-auto p-2">
-            <Group label="Local" dot="var(--success)" models={local} active={activeModelId} onPick={setModel} />
-            <Group label="Cloud" dot="var(--info)" models={cloud} active={activeModelId} onPick={setModel} />
+            <Group label="Local" dot="var(--success)" models={local} active={activeModelId} onPick={setModel} onPull={pullModel} />
+            <Group label="Cloud" dot="var(--info)" models={cloud} active={activeModelId} onPick={setModel} onPull={pullModel} />
+            {localOnly && (
+              <div className="mx-1 mt-1 flex items-center gap-2 rounded-md bg-bg-subtle px-2.5 py-2 text-caption text-text-secondary">
+                <ShieldCheck size={13} style={{ color: "var(--success)" }} />
+                Local-only mode is on — cloud models are hidden.
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -100,12 +109,14 @@ function Group({
   models: list,
   active,
   onPick,
+  onPull,
 }: {
   label: string;
   dot: string;
-  models: typeof models;
+  models: Model[];
   active: string;
   onPick: (id: string) => void;
+  onPull: (id: string) => void;
 }) {
   if (list.length === 0) return null;
   return (
@@ -138,7 +149,15 @@ function Group({
                   <CircleDot size={13} className="animate-live-pulse text-cyan-500" />
                 )}
                 {m.installState === "available" && m.kind === "local" && (
-                  <span className="inline-flex items-center gap-1 text-caption text-primary">
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onPull(m.id);
+                    }}
+                    className="inline-flex items-center gap-1 rounded px-1 text-caption text-primary hover:underline"
+                  >
                     <Download size={12} /> Pull
                   </span>
                 )}

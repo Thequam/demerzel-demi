@@ -19,9 +19,24 @@
 
 ## 2. Color System
 
-Demi's palette: **primary = a family of blues** (Royal Blue lead + Azure, Turquoise, Cyan), **secondary = gunmetal + light grays**, **accent = gold** (with tan/beige/olive as supporting warmth), plus black/white/neutral grays. Every hue ships a 50-900 ramp so components can compose consistently across light and dark.
+Demi's palette: **primary = Demerzel Teal (the logo/brand lead) + a family of blues** (Royal Blue, Azure, Turquoise, Cyan), **secondary = gunmetal + light grays**, **accent = gold** (with tan/beige/olive as supporting warmth), plus black/white/neutral grays. Every hue ships a 50-900 ramp so components can compose consistently across light and dark.
 
-### 2.1 Primary - Royal Blue (lead brand color)
+### 2.1 Primary - Demerzel Teal (lead brand / logo color)
+The signature color of the Demerzel logo and Demi's primary brand accent.
+```
+teal-50    #E6F7F7
+teal-100   #C2ECEC
+teal-200   #8FDCDC
+teal-300   #54C7C7
+teal-400   #1FACAC
+teal-500   #008B8B   <- base (brand / logo)
+teal-600   #007373
+teal-700   #075C5C
+teal-800   #094A4A
+teal-900   #0A3838
+```
+
+### 2.2 Primary - Royal Blue (lead brand color)
 ```
 royal-50   #EEF2FF
 royal-100  #DCE3FF
@@ -35,7 +50,7 @@ royal-800  #1D2769
 royal-900  #141B4A
 ```
 
-### 2.2 Primary - Azure / Cobalt (the "other blue")
+### 2.3 Primary - Azure / Cobalt (the "other blue")
 ```
 azure-50   #E8F2FF
 azure-100  #CFE4FF
@@ -49,7 +64,7 @@ azure-800  #0A3673
 azure-900  #07254D
 ```
 
-### 2.3 Primary - Turquoise
+### 2.4 Primary - Turquoise
 ```
 turq-50    #E6FBF7
 turq-100   #C3F5EC
@@ -63,7 +78,7 @@ turq-800   #08534A
 turq-900   #063A34
 ```
 
-### 2.4 Primary - Cyan
+### 2.5 Primary - Cyan
 ```
 cyan-50    #E4FBFF
 cyan-100   #BAF3FF
@@ -77,9 +92,9 @@ cyan-800   #064E60
 cyan-900   #053744
 ```
 
-> Blue usage order: **Royal** = brand / primary actions. **Azure** = informational, links, secondary actions. **Turquoise** = success / "local model" accent. **Cyan** = highlights, data viz, "live"/streaming states. Used together they form Demi's signature gradient: `royal-500 -> azure-500 -> cyan-400`.
+> Brand/blue usage order: **Teal** (`#008B8B`) = the lead brand and logo color, used for primary brand identity moments and the new teal gradient. **Royal** = brand / primary actions. **Azure** = informational, links, secondary actions. **Turquoise** = success / "local model" accent. **Cyan** = highlights, data viz, "live"/streaming states. Used together the blues form Demi's signature gradient: `royal-500 -> azure-500 -> cyan-400`; the teal-led variant is `teal-500 -> turq-500 -> cyan-300` (see 3.3).
 
-### 2.5 Secondary - Gunmetal Gray
+### 2.6 Secondary - Gunmetal Gray
 ```
 gun-50     #F1F3F5
 gun-100    #DDE1E6
@@ -93,7 +108,7 @@ gun-800    #1E232A
 gun-900    #13171C
 ```
 
-### 2.6 Secondary - Light Gray
+### 2.7 Secondary - Light Gray
 ```
 lg-50      #FAFBFC
 lg-100     #F2F4F6
@@ -103,7 +118,7 @@ lg-400     #C0C7CF
 lg-500     #A7B0BA
 ```
 
-### 2.7 Accent - Gold (lead accent)
+### 2.8 Accent - Gold (lead accent)
 ```
 gold-50    #FBF6E9
 gold-100   #F6EBC8
@@ -117,7 +132,7 @@ gold-800   #5C430C
 gold-900   #3F2E09
 ```
 
-### 2.8 Accent - Supporting warmth (tan / beige / olive)
+### 2.9 Accent - Supporting warmth (tan / beige / olive)
 ```
 beige-200  #F0E7D3
 beige-300  #E8DDC7   <- soft surfaces, callouts
@@ -129,7 +144,7 @@ olive-600  #5F5E30
 
 > Accent rule: **Gold is the only accent that drives attention** (highlights, selected states, premium/pro markers, the logo dot). Tan/beige are surface warmth; olive is a rare tertiary tag color. Never use two accents on the same element.
 
-### 2.9 Neutrals
+### 2.10 Neutrals
 ```
 black      #0B0E11   <- app near-black
 true-black #000000
@@ -137,7 +152,7 @@ white      #FFFFFF
 off-white  #FAFAFA
 ```
 
-### 2.10 Semantic status colors
+### 2.11 Semantic status colors
 ```
 success-500 #0FB39A   (turquoise family)
 info-500    #1E6FE0   (azure family)
@@ -168,6 +183,8 @@ These map raw ramps to roles. Implement as CSS variables switched by `data-theme
 --primary-fg        white    #FFFFFF
 --accent            gold-500 #C29318
 --accent-fg         gun-900  #13171C
+--brand-teal        teal-500 #008B8B
+--brand-teal-fg     white    #FFFFFF
 --link              azure-600 #135BBF
 --success           turq-500 #0FB39A
 --info              azure-500 #1E6FE0
@@ -176,23 +193,26 @@ These map raw ramps to roles. Implement as CSS variables switched by `data-theme
 --focus-ring        azure-400 #3D8AF0
 ```
 
-### 3.2 Dark theme
+### 3.2 Dark theme (metallic gunmetal)
+The dark theme is tuned to read like cool brushed gunmetal: the grays are shifted slightly blue/steel and stacked into layered metal "plates" (base -> plate -> raised plate) rather than flat charcoal.
 ```
---bg                gun-900  #13171C
---bg-subtle         black    #0B0E11
---surface           gun-800  #1E232A
---surface-raised    gun-700  #2B323B
---border            gun-700  #2B323B
---border-strong     gun-600  #39424E
---text              lg-100   #F2F4F6
---text-secondary    gun-200  #BBC2CB
---text-muted        gun-400  #6B7685
---primary           royal-400 #6478F5
---primary-hover     royal-300 #8FA3FF
---primary-fg        gun-900  #13171C
---accent            gold-300 #E3C158
---accent-fg         gun-900  #13171C
---link              azure-300 #6BA8FF
+--bg                gunmetal-base    #161A20
+--bg-subtle         gunmetal-deep    #0E1116
+--surface           gunmetal-plate   #20262E
+--surface-raised    gunmetal-raised  #2A323C
+--border            steel            #333C47
+--border-strong     steel-strong     #44505D
+--text              lg-100           #F2F4F6
+--text-secondary    gun-200          #BBC2CB
+--text-muted        gun-400          #6B7685
+--primary           royal-400        #6478F5
+--primary-hover     royal-300        #8FA3FF
+--primary-fg        gun-900          #13171C
+--accent            gold-300         #E3C158
+--accent-fg         gun-900          #13171C
+--brand-teal        teal-400         #1FACAC   (brighter for contrast on gunmetal)
+--brand-teal-fg     teal-900         #0A3838
+--link              azure-300        #6BA8FF
 --success           turq-300 #54DCC6
 --info              azure-300 #6BA8FF
 --warning           gold-300 #E3C158
@@ -200,8 +220,9 @@ These map raw ramps to roles. Implement as CSS variables switched by `data-theme
 --focus-ring        azure-300 #6BA8FF
 ```
 
-### 3.3 Signature gradient
-- **Brand gradient:** `linear-gradient(135deg, #4154D6 0%, #1E6FE0 50%, #43D8F7 100%)` (royal -> azure -> cyan). Use sparingly: onboarding headers, the model-switcher "active" glow, empty-state hero, artifact header bars.
+### 3.3 Signature gradients
+- **Brand gradient** (`bg-brand-gradient`): `linear-gradient(135deg, #4154D6 0%, #1E6FE0 50%, #43D8F7 100%)` (royal -> azure -> cyan). Use sparingly: onboarding headers, the model-switcher "active" glow, empty-state hero, artifact header bars.
+- **Teal brand gradient** (`bg-brand-gradient-teal`): `linear-gradient(135deg, #008B8B 0%, #0FB39A 50%, #43D8F7 100%)` (teal -> turquoise -> cyan). Demi's logo-led identity gradient; use for brand moments where the Demerzel Teal should lead (brand headers, splash, account/brand marks). Same "use sparingly" rule applies.
 
 ---
 
@@ -253,6 +274,11 @@ shadow-md   0 4px 12px rgba(19,23,28,0.08)
 shadow-lg   0 12px 32px rgba(19,23,28,0.12)
 shadow-glow 0 0 0 3px rgba(61,138,240,0.35)   (focus / active model chip)
 ```
+
+#### Brushed metal sheen (dark only)
+- `.metal-surface`: applies a very subtle top-light linear-gradient sheen plus a hairline inset top highlight to evoke brushed gunmetal. Active only under `[data-theme="dark"]`; it is a no-op in light mode.
+- `.metal-rail`: a faint vertical brushed variant for the left rail.
+- Keep these subtle. Dark elevation still leans primarily on `--surface-raised` + `--border`; the sheen is an accent on large metal "plates" (rail, composer, panel headers, raised cards), not something to apply everywhere. Do not stack it on small chips/badges.
 
 ### Motion
 - Durations: 120ms (micro), 200ms (default), 320ms (panel/overlay).
@@ -337,7 +363,7 @@ shadow-glow 0 0 0 3px rgba(61,138,240,0.35)   (focus / active model chip)
 
 ## 8. Implementation Notes (Tailwind + CSS variables)
 
-- Define ramps under `theme.extend.colors` (royal/azure/turquoise/cyan/gun/lg/gold/tan/beige/olive + semantic statuses).
+- Define ramps under `theme.extend.colors` (teal/royal/azure/turquoise/cyan/gun/lg/gold/tan/beige/olive + semantic statuses).
 - Expose semantic tokens as CSS variables on `:root` and `[data-theme="dark"]`; map Tailwind semantic utilities (e.g. `bg-surface`, `text-secondary`, `border-default`) to `var(--...)` so components stay theme-agnostic.
-- Ship the brand gradient as a reusable utility (`bg-brand-gradient`).
+- Ship the brand gradients as reusable utilities (`bg-brand-gradient`, `bg-brand-gradient-teal`).
 - Icon set: Lucide (consistent 1.5px stroke). Mono font for all model ids/tags/terminal.
