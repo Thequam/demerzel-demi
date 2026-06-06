@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demerzel (Demi) - Product Requirements Document</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/demi-docs.css">
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="brand"><div class="brand-mark"></div><div class="brand-name">Demi</div></div>
+    <div class="brand-sub">Product Requirements Document</div>
+    <div class="toc">
+<a href="#1-overview-vision" class="">Overview &amp; Vision</a>
+<a href="#one-line-positioning" class="sub">One-line positioning</a>
+<a href="#why-this-exists" class="sub">Why this exists</a>
+<a href="#2-goals-non-goals" class="">Goals &amp; Non-Goals</a>
+<a href="#goals" class="sub">Goals</a>
+<a href="#non-goals-v1" class="sub">Non-Goals (v1)</a>
+<a href="#3-target-users" class="">Target Users</a>
+<a href="#4-platform-tech-stack-decision" class="">Platform &amp; Tech Stack Decision</a>
+<a href="#recommendation-electron-vite-react-typescript" class="sub">Recommendation: Electron + Vite + React + TypeScript</a>
+<a href="#proposed-stack" class="sub">Proposed stack</a>
+<a href="#high-level-architecture" class="sub">High-level architecture</a>
+<a href="#5-information-architecture-three-modes" class="">Information Architecture (Three Modes)</a>
+<a href="#5-1-chat-mode" class="sub">5.1 Chat mode</a>
+<a href="#5-2-cowork-mode" class="sub">5.2 Cowork mode</a>
+<a href="#5-3-code-mode" class="sub">5.3 Code mode</a>
+<a href="#6-model-system-core-differentiator" class="">Model System (Core Differentiator)</a>
+<a href="#6-1-unified-model-registry" class="sub">6.1 Unified model registry</a>
+<a href="#6-2-in-composer-model-switcher" class="sub">6.2 In-composer model switcher</a>
+<a href="#6-3-mid-conversation-switching-perplexity-style" class="sub">6.3 Mid-conversation switching (Perplexity-style)</a>
+<a href="#6-4-model-manager-the-ollama-like-surface" class="sub">6.4 Model Manager (the Ollama-like surface)</a>
+<a href="#6-5-inference-layer-provider-abstraction" class="sub">6.5 Inference layer (provider abstraction)</a>
+<a href="#6-6-ollama-base-urls-connection" class="sub">6.6 Ollama base URLs &amp; connection</a>
+<a href="#7-projects-the-project-folder-flow-codex-inspired" class="">Projects &amp; the Project -&gt; Folder Flow (Codex-inspired)</a>
+<a href="#concepts" class="sub">Concepts</a>
+<a href="#the-flow" class="sub">The flow</a>
+<a href="#sync-rules" class="sub">Sync rules</a>
+<a href="#8-artifacts-system" class="">Artifacts System</a>
+<a href="#9-connectors-mcp" class="">Connectors / MCP</a>
+<a href="#10-agent-capabilities" class="">Agent Capabilities</a>
+<a href="#11-settings-customize" class="">Settings &amp; Customize</a>
+<a href="#12-optional-backend-convex" class="">Optional Backend (Convex)</a>
+<a href="#13-data-model-local" class="">Data Model (Local)</a>
+<a href="#14-privacy-security" class="">Privacy &amp; Security</a>
+<a href="#15-roadmap-phased" class="">Roadmap (Phased)</a>
+<a href="#16-open-questions-future-work" class="">Open Questions &amp; Future Work</a>
+<a href="#appendix-a-ollama-api-reference-used-by-the-integration" class="">Appendix A - Ollama API Reference (used by the integration)</a>
+<a href="#appendix-b-reference-apps-grounding" class="">Appendix B - Reference Apps (grounding)</a>
+    </div>
+  </nav>
+  <main class="content">
+    <div class="content-inner">
+      <header class="hero">
+        <div class="eyebrow">Product Requirements Document</div>
+        <h1>Demerzel (Demi) - Product Requirements Document</h1>
+        <p>A local-first, Ollama-powered agent harness with a Claude-grade interface. Chat, Cowork, and Code in one app; switch between local models (Gemma, DeepSeek, Minimax, Nemotron, GLM/ZAI, Qwen) and cloud providers (Anthropic, OpenAI, Ollama Cloud) mid-conversation; turn a project into a real folder on disk and build software with a coding agent.</p>
+        <div class="hero-tags"><span>Demerzel (Demi)</span><span>Local-first</span><span>Ollama-powered</span><span>Chat / Cowork / Code</span></div>
+      </header>
+<ul><li>Version: 0.1 (Draft)</li><li>Date: June 2026</li><li>Owner: Kwame</li><li>Status: Pre-build specification</li></ul>
+<hr>
+<h2 id="1-overview-vision"><span class="num">1</span>Overview &amp; Vision</h2>
+<p><strong>Demerzel</strong> (short name <strong>Demi</strong>) is a desktop agent harness that gives a Claude-Desktop-class experience to *locally run* models, while still letting users reach for frontier cloud models when they want to. It is named after Asimov's quietly capable companion-strategist: an assistant that does serious work in the background and brings results forward.</p>
+<p>The core thesis: the polished, three-mode Claude experience (conversational chat, agentic "cowork," and an embedded coding agent) should not be locked to one vendor's cloud. Demi wraps <strong>Ollama</strong> so any model the user can pull runs inside the same first-class UI, and a unified model layer makes switching between a local <code>gemma4</code> and a cloud <code>claude-opus</code> as easy as Perplexity makes switching search models.</p>
+<h3 id="one-line-positioning">One-line positioning</h3>
+<blockquote><p>"Ollama's local models with Claude's interface and Cursor's coding agent - on your machine, under your control."</p></blockquote>
+<h3 id="why-this-exists">Why this exists</h3>
+<ul><li><strong>Ollama</strong> is powerful but its UX is a CLI / minimal chat. There is no Projects, Artifacts, Cowork, scheduled agents, MCP connectors, or coding agent.</li><li><strong>Claude Desktop</strong> has the best-in-class UX (Chat / Cowork / Code, Artifacts, Connectors, Scheduled tasks, Design) but is cloud-only and single-vendor.</li><li><strong>Cursor / Codex</strong> nail the project-to-folder coding loop but are coding-first.</li><li>Demi fuses these: Claude's information architecture, Cursor's coding loop, Perplexity's model fluidity, and Ollama's local-model freedom.</li></ul>
+<hr>
+<h2 id="2-goals-non-goals"><span class="num">2</span>Goals &amp; Non-Goals</h2>
+<h3 id="goals">Goals</h3>
+<ul><li>G1. Run any Ollama-available model in a first-class chat UI with streaming, thinking traces, and tool calling.</li><li>G2. Let users browse, pull (with live progress), inspect, and delete models from inside the app (an Ollama "Model Manager").</li><li>G3. Switch models mid-conversation, including across local &lt;-&gt; cloud, carrying context forward.</li><li>G4. Provide three modes mirroring Claude: <strong>Chat</strong>, <strong>Cowork</strong> (agentic + scheduled tasks), <strong>Code</strong> (coding agent).</li><li>G5. Support the <strong>Project -&gt; Folder</strong> flow: a project (a managed container) can be materialized to a real local directory the Code agent operates on.</li><li>G6. Connect external tools/data via <strong>MCP connectors</strong> with a per-tool permission model.</li><li>G7. Be <strong>local-first</strong>: everything works fully offline with local models; no account required.</li><li>G8. Offer an <strong>optional Convex backend</strong> for users who want cross-device sync, server-run scheduled tasks, and shared artifacts.</li></ul>
+<h3 id="non-goals-v1">Non-Goals (v1)</h3>
+<ul><li>NG1. Building a custom inference engine (we wrap Ollama; a native llama.cpp engine is future work).</li><li>NG2. Mobile apps (desktop first).</li><li>NG3. Multi-user team collaboration / org management.</li><li>NG4. Training or fine-tuning models in-app.</li><li>NG5. A marketplace for connectors/skills (curated list only in v1).</li></ul>
+<hr>
+<h2 id="3-target-users"><span class="num">3</span>Target Users</h2>
+<ul><li><strong>Local-AI enthusiasts / privacy-conscious devs</strong> who already use Ollama and want a real UI.</li><li><strong>Developers</strong> who want a Cursor-like coding agent that can run on local models (no per-token cloud cost).</li><li><strong>Power users / "vibe builders"</strong> who want Claude-style Projects, Artifacts, and scheduled agents without vendor lock-in.</li><li><strong>People on metered or air-gapped networks</strong> who need offline capability with optional cloud bursting.</li></ul>
+<hr>
+<h2 id="4-platform-tech-stack-decision"><span class="num">4</span>Platform &amp; Tech Stack Decision</h2>
+<h3 id="recommendation-electron-vite-react-typescript">Recommendation: Electron + Vite + React + TypeScript</h3>
+<p><strong>Why Electron (over Tauri / web-only):</strong></p>
+<ul><li><strong>Parity with reference apps.</strong> Claude Desktop, Cursor, and ChatGPT/Codex desktop are all Electron-class apps; the UX patterns we are matching are proven there.</li><li><strong>First-class Node main process.</strong> We must spawn/health-check the local <strong>Ollama</strong> process, launch <strong>MCP stdio servers</strong> as child processes, and use <strong>node-pty</strong> for the Code terminal. Node makes this straightforward.</li><li><strong>Full filesystem access.</strong> The Project -&gt; Folder materialization, file tree, and code editing need unrestricted local FS access.</li><li><strong>Richest UI ecosystem.</strong> React + Tailwind + Radix + Monaco + xterm.js are all battle-tested in Electron.</li></ul>
+<p><strong>Tauri considered</strong> (smaller binaries, Rust core, better memory) but rejected for v1 due to slower iteration velocity, a smaller plugin ecosystem for the integrations we need (pty, MCP stdio), and webview inconsistencies across platforms. Revisit post-1.0 if footprint matters.</p>
+<h3 id="proposed-stack">Proposed stack</h3>
+<ul><li><strong>Shell:</strong> Electron (main + preload + renderer), context isolation on, IPC bridge.</li><li><strong>Build:</strong> Vite + electron-vite; TypeScript everywhere.</li><li><strong>UI:</strong> React 18, Tailwind CSS with design tokens (see <code>DESIGN_SYSTEM.md</code>), Radix UI primitives / shadcn-style components, Framer Motion for transitions, Lucide icons.</li><li><strong>State:</strong> Zustand for app state; TanStack Query for async/stream orchestration.</li><li><strong>Local persistence:</strong> SQLite via <code>better-sqlite3</code> (chats, messages, projects, settings, connector configs, schedules). Local filesystem for materialized <strong>folders</strong> (workspaces) and artifact files.</li><li><strong>Secrets:</strong> OS keychain via <code>keytar</code> for cloud API keys (never in SQLite/plaintext).</li><li><strong>Local models:</strong> Ollama HTTP client (see Section 6).</li><li><strong>Cloud models:</strong> provider adapters behind a unified interface (Section 6).</li><li><strong>Connectors:</strong> <code>@modelcontextprotocol/sdk</code> (v1.x) MCP client over stdio + Streamable HTTP.</li><li><strong>Code mode:</strong> Monaco editor, xterm.js + node-pty terminal, chokidar file watching, a diff viewer, and an embedded preview (BrowserView/iframe) for dev servers.</li><li><strong>Optional backend:</strong> <strong>Convex</strong> (see Section 12).</li></ul>
+<h3 id="high-level-architecture">High-level architecture</h3>
+<div class="mermaid">flowchart TD
+  UI["Renderer (React): Chat / Cowork / Code"] --&gt;|IPC| Main["Electron Main Process"]
+  Main --&gt; Store["SQLite + Local FS (projects, folders, artifacts, settings)"]
+  Main --&gt; Router["Unified Model Router"]
+  Router --&gt; Ollama["Ollama localhost API (local models)"]
+  Router --&gt; Cloud["Cloud Adapters (Anthropic / OpenAI / Ollama Cloud)"]
+  Main --&gt; MCP["MCP Client (stdio + Streamable HTTP connectors)"]
+  Main --&gt; Agent["Agent Loop (tool calling, file ops, terminal, scheduler)"]
+  Main -. optional sync .-&gt; Convex["Convex Backend (sync, server schedules, shared artifacts)"]</div>
+<hr>
+<h2 id="5-information-architecture-three-modes"><span class="num">5</span>Information Architecture (Three Modes)</h2>
+<p>The left rail holds three top-level modes (mirroring Claude Desktop's Chat / Cowork / Code), plus persistent nav: New, Projects, Artifacts, Customize, and the account/footer. A global model switcher lives in every composer.</p>
+<div class="mermaid">flowchart LR
+  subgraph nav [Left Rail]
+    Chat
+    Cowork
+    Code
+    Projects
+    Artifacts
+    Customize
+  end
+  Chat --&gt; Conv["Conversation + Artifact panel"]
+  Cowork --&gt; Tasks["Agentic tasks + Scheduled + Live artifacts"]
+  Code --&gt; Sessions["Coding sessions + Editor/Terminal/Preview"]
+  Projects --&gt; ProjView["Project container -&gt; open as Folder"]</div>
+<h3 id="5-1-chat-mode">5.1 Chat mode</h3>
+<ul><li>Conversational interface with streaming responses and reasoning ("thinking") display toggle.</li><li>Composer with: model switcher, reasoning-effort selector (e.g. Low/Medium/High), attachments (files, images for vision models), and quick actions (Write / Learn / From Folder).</li><li><strong>Artifacts side-panel</strong> for generated HTML/markdown/code/docs, with live preview, copy, download-all, and "open in browser."</li><li>Conversations can be promoted to a <strong>Project</strong> at any time.</li></ul>
+<h3 id="5-2-cowork-mode">5.2 Cowork mode</h3>
+<ul><li>Agentic task runner: "knock something off your list." User describes a task; Demi plans and executes with tools.</li><li><strong>Scheduled / recurring tasks</strong> (e.g. "every Monday at 9am"): each task has instructions, run history (success/warn/fail), and a <strong>Keep awake</strong> option (tasks run while the machine is awake; server-run if Convex is enabled).</li><li><strong>Live artifacts:</strong> long-lived outputs (dashboards, docs) the agent updates across runs.</li><li>"Work in a project" selector so a task operates within a project's context/folder.</li><li><strong>Dispatch (Beta-style):</strong> fire a one-off agent task into the background and get notified on completion.</li></ul>
+<h3 id="5-3-code-mode">5.3 Code mode</h3>
+<ul><li>Coding-agent sessions (Cursor/Codex-like): describe a task, the agent reads/edits files, runs commands, and previews results.</li><li>Layout: file tree + Monaco editor + integrated terminal (node-pty) + preview pane for dev servers.</li><li>A session is bound to a <strong>folder</strong> (a materialized project or any opened local directory).</li><li><strong>Usage dashboard</strong> on the Code home: sessions, messages, total tokens, active-days heatmap, current/longest streak, peak hour, favorite model (local + cloud usage tracked separately).</li><li><strong>Routines:</strong> reusable, parameterized coding workflows the user can re-run.</li></ul>
+<hr>
+<h2 id="6-model-system-core-differentiator"><span class="num">6</span>Model System (Core Differentiator)</h2>
+<h3 id="6-1-unified-model-registry">6.1 Unified model registry</h3>
+<p>A single in-app catalog merges:</p>
+<ul><li><strong>Local models</strong> discovered via Ollama <code>/api/tags</code> and <code>/api/ps</code> (loaded state).</li><li><strong>Cloud provider models</strong> declared by adapters (Anthropic, OpenAI, etc.).</li><li><strong>Ollama Cloud</strong> models (the <code>:cloud</code> tags) for users who want hosted Ollama inference.</li></ul>
+<p>Each registry entry carries normalized metadata: id, display name, provider, parameter size, context window, quantization (local), capabilities (<code>vision</code>, <code>tools</code>, <code>thinking</code>), approximate VRAM/RAM need, and install state (installed / available / loaded).</p>
+<h3 id="6-2-in-composer-model-switcher">6.2 In-composer model switcher</h3>
+<ul><li>Mirrors Claude's <code>Opus 4.8  High</code> chip: pick a <strong>model</strong> and a <strong>reasoning effort</strong>.</li><li>Grouped by Local / Cloud, with capability badges and a search box.</li><li>Shows VRAM warnings for local models that may not fit the user's hardware.</li></ul>
+<h3 id="6-3-mid-conversation-switching-perplexity-style">6.3 Mid-conversation switching (Perplexity-style)</h3>
+<ul><li>The user can change models on any turn. Conversation history is preserved and re-fed to the new model (with provider-specific message normalization).</li><li>Per-message provenance: every assistant message records which model produced it (badge + tooltip).</li><li>Graceful capability handling: if switching to a non-vision model after an image was sent, Demi warns and substitutes a text description placeholder.</li></ul>
+<h3 id="6-4-model-manager-the-ollama-like-surface">6.4 Model Manager (the Ollama-like surface)</h3>
+<ul><li><strong>Browse catalog:</strong> curated grid of popular 2026 models with sizes/capabilities, e.g.:</li><ul><li><code>gemma4</code> (26B / 31B; vision + thinking + tools; ~128K ctx)</li><li><code>deepseek-v3.2</code>, <code>deepseek-v4-pro</code> (reasoning, MoE)</li><li><code>minimax-m2.5</code>, <code>minimax-m2.7</code> (~200B MoE; agentic/coding)</li><li><code>nemotron-3-nano</code> (4B-30B; up to ~1M ctx) and <code>nemotron-3-super</code></li><li><code>glm-5</code> / <code>glm-5.1</code> (ZAI; reasoning)</li><li><code>qwen3.5</code>, <code>qwen3-coder-next</code>, <code>kimi-k2.5</code></li></ul><li><strong>Pull with live progress:</strong> stream <code>/api/pull</code> ndjson, show layer/byte progress and ETA.</li><li><strong>Inspect:</strong> <code>/api/show</code> details (license, params, template, modelfile).</li><li><strong>Manage:</strong> delete (<code>/api/delete</code>), copy, view currently loaded (<code>/api/ps</code>) with unload control.</li><li><strong>Hardware fit:</strong> display estimated VRAM at Q4_K_M and flag models that exceed detected GPU/RAM.</li></ul>
+<h3 id="6-5-inference-layer-provider-abstraction">6.5 Inference layer (provider abstraction)</h3>
+<p>A unified <code>ModelProvider</code> interface so the agent loop is provider-agnostic:</p>
+<ul><li><code>OllamaProvider</code> -&gt; <code>POST /api/chat</code> (streaming ndjson; reads <code>message.content</code>, <code>message.thinking</code>, and <code>message.tool_calls</code>).</li><li><code>AnthropicProvider</code>, <code>OpenAIProvider</code> -&gt; respective streaming chat APIs, normalized to the same event shape (text delta / thinking delta / tool_call / done).</li><li><strong>Tool calling loop:</strong> Ollama returns <code>tool_calls</code> for the host to execute; Demi runs the tool (file op, terminal, MCP, web fetch), appends a <code>tool</code> role message, and continues - identical pattern across providers.</li></ul>
+<h3 id="6-6-ollama-base-urls-connection">6.6 Ollama base URLs &amp; connection</h3>
+<ul><li>Default local base URL: <code>http://localhost:11434/api</code> (configurable for remote Ollama hosts).</li><li>App detects whether Ollama is installed/running; if not, surfaces a guided install/start flow.</li><li>Ollama Cloud base URL <code>https://ollama.com/api</code> supported for <code>:cloud</code> tags.</li></ul>
+<hr>
+<h2 id="7-projects-the-project-folder-flow-codex-inspired"><span class="num">7</span>Projects &amp; the Project -&gt; Folder Flow (Codex-inspired)</h2>
+<h3 id="concepts">Concepts</h3>
+<ul><li><strong>Project:</strong> a managed container (lives in SQLite + an app-managed directory). Holds chats, custom instructions, reference files, and configuration. Conceptually the "cloud-like" workspace.</li><li><strong>Folder:</strong> a real directory on the user's disk that the Code agent operates on (git repo, source tree, etc.). Conceptually "local storage."</li></ul>
+<h3 id="the-flow">The flow</h3>
+<ol><li>A chat/idea becomes a <strong>Project</strong> (promote from Chat or create new).</li><li>The project accumulates context (instructions, files, generated artifacts).</li><li><strong>Open/Export as Folder:</strong> materialize the project to a chosen local directory - generated files, artifacts, and a <code>demi.project.json</code> manifest are written to disk.</li><li><strong>Code mode</strong> binds to that folder; edits flow both ways (the project tracks the folder path).</li><li>Optionally <strong>link an existing folder</strong> to a project (reverse direction).</li></ol>
+<div class="mermaid">flowchart LR
+  Chat["Chat / Idea"] --&gt; Project["Project (managed container)"]
+  Project --&gt;|"Open as Folder"| Folder["Local Folder on Disk"]
+  Folder --&gt; Code["Code Mode (agent edits + runs)"]
+  ExistingFolder["Existing Local Folder"] --&gt;|"Link"| Project</div>
+<h3 id="sync-rules">Sync rules</h3>
+<ul><li>Project metadata (instructions, chat history) stays in SQLite.</li><li>The folder is the source of truth for code files once materialized.</li><li>A manifest (<code>demi.project.json</code>) records the binding, model defaults, and connector config so a folder can be re-opened as a project later.</li></ul>
+<hr>
+<h2 id="8-artifacts-system"><span class="num">8</span>Artifacts System</h2>
+<ul><li>Detects fenced artifacts (HTML, markdown, React/code, SVG, mermaid) in model output.</li><li>Renders in a side-panel with: live preview, source/preview toggle, copy, download (single + "download all"), and "open in default browser."</li><li>Artifacts persist per-conversation and per-project; can be promoted to <strong>Live artifacts</strong> in Cowork (updated across scheduled runs).</li><li>Versioning: each regeneration creates a new version with quick diff/restore.</li></ul>
+<hr>
+<h2 id="9-connectors-mcp"><span class="num">9</span>Connectors / MCP</h2>
+<ul><li>Built on the <strong>Model Context Protocol</strong>; Demi acts as an MCP <strong>client</strong>.</li><li><strong>Transports:</strong> stdio (spawn local server processes) and Streamable HTTP (remote servers). Targets MCP TS SDK v1.x (production-recommended).</li><li><strong>Add a connector:</strong> via a config form or importing a standard <code>mcpServers</code> JSON block (same shape as Claude Desktop's config), e.g. filesystem, git, github, postgres, fetch, memory.</li><li><strong>Tool permission model</strong> (mirrors the Airtable connector screenshot): per-tool setting of <strong>Allow / Ask (needs approval) / Deny</strong>, with read-only tools grouped and surfaced separately. Default to "Ask" for any state-changing tool.</li><li>Tools discovered via <code>tools/list</code>, invoked via <code>tools/call</code>; results fed back into the agent loop.</li><li>Resources (<code>resources/*</code>) can be browsed and attached into context.</li></ul>
+<hr>
+<h2 id="10-agent-capabilities"><span class="num">10</span>Agent Capabilities</h2>
+<ul><li><strong>Tool calling</strong> across all providers (unified loop, Section 6.5).</li><li><strong>Built-in tools:</strong> file read/write/search, terminal/command execution (node-pty), web fetch/search, artifact write, and project/folder operations.</li><li><strong>MCP tools:</strong> any connected server's tools (gated by permissions).</li><li><strong>Scheduled tasks (Cowork):</strong> cron-like schedules with instructions, run history, and notifications. Local schedules run while the machine is awake (with a Keep-awake toggle); server-run schedules require the optional Convex backend.</li><li><strong>Safety:</strong> destructive operations (delete, overwrite, shell) require confirmation unless the user has granted standing permission for that tool/scope.</li></ul>
+<hr>
+<h2 id="11-settings-customize"><span class="num">11</span>Settings &amp; Customize</h2>
+<ul><li><strong>Providers:</strong> add/remove cloud providers and API keys (stored in OS keychain), set default models per mode.</li><li><strong>Ollama:</strong> base URL, auto-start toggle, model storage location, GPU/CPU info display.</li><li><strong>Appearance:</strong> light/dark/system theme, accent selection (see Design System), density.</li><li><strong>Privacy:</strong> telemetry off by default; explicit "local-only" mode that disables all cloud calls.</li><li><strong>Skills / Routines:</strong> manage reusable instructions and coding routines.</li><li><strong>Connectors:</strong> manage MCP servers and per-tool permissions.</li></ul>
+<hr>
+<h2 id="12-optional-backend-convex"><span class="num">12</span>Optional Backend (Convex)</h2>
+<p>Demi is local-first by default; <strong>Convex is an optional, opt-in backend</strong> for users who sign in. Convex is well-suited here because of its reactive queries, scheduled functions, and file storage.</p>
+<p>When enabled, Convex provides:</p>
+<ul><li><strong>Cross-device sync</strong> of projects, chats, instructions, and settings (NOT model weights; those stay local with Ollama).</li><li><strong>Server-run scheduled tasks</strong> (Convex scheduled functions / crons) so Cowork tasks can run even when the desktop is asleep - using cloud providers for inference (local models still require the local machine).</li><li><strong>Shared artifacts</strong> via Convex file storage with shareable links.</li><li><strong>Auth</strong> for the above (Convex Auth or a provider like Clerk).</li></ul>
+<p>Design constraints:</p>
+<ul><li>The app must remain fully functional with Convex disabled.</li><li>A sync adapter abstracts persistence so SQLite (local) and Convex (cloud) implement the same interface; conflict resolution is last-write-wins with per-entity version stamps in v1.</li><li>Secrets/API keys are never synced; they remain in the local keychain.</li></ul>
+<blockquote><p>Note: Convex code must follow <code>convex/_generated/ai/guidelines.md</code> once the backend is scaffolded.</p></blockquote>
+<hr>
+<h2 id="13-data-model-local"><span class="num">13</span>Data Model (Local)</h2>
+<p>SQLite tables (local-first source of truth):</p>
+<ul><li><code>projects</code> (id, name, instructions, folder_path?, default_model, created_at, updated_at)</li><li><code>folders</code> (id, project_id?, path, kind, last_opened_at)</li><li><code>chats</code> (id, project_id?, mode, title, created_at, updated_at)</li><li><code>messages</code> (id, chat_id, role, content, thinking?, model_id, tool_calls?, created_at)</li><li><code>artifacts</code> (id, chat_id?, project_id?, type, title, content, version, created_at)</li><li><code>models</code> (id, provider, name, params, context, capabilities, install_state, size_bytes)</li><li><code>connectors</code> (id, name, transport, config_json, enabled)</li><li><code>tool_permissions</code> (id, connector_id, tool_name, policy) -- allow | ask | deny</li><li><code>schedules</code> (id, task_name, cron, instructions, project_id?, keep_awake, last_run_at, status)</li><li><code>runs</code> (id, schedule_id?, started_at, finished_at, status, log)</li><li><code>settings</code> (key, value)</li></ul>
+<p>Local filesystem layout (app data dir):</p>
+<ul><li><code>/projects/&lt;id&gt;/</code> managed project files + <code>demi.project.json</code></li><li><code>/artifacts/&lt;id&gt;/</code> exported artifact files</li><li><code>/logs/</code> agent + run logs</li></ul>
+<p>API keys live in the OS keychain, keyed by provider.</p>
+<hr>
+<h2 id="14-privacy-security"><span class="num">14</span>Privacy &amp; Security</h2>
+<ul><li><strong>Local-first, offline-capable:</strong> with only local models, no data leaves the machine.</li><li><strong>Secrets in keychain:</strong> cloud API keys never stored in SQLite or synced.</li><li><strong>MCP sandboxing:</strong> stdio servers run as child processes with explicit, per-tool permissions; default-deny for state-changing tools until approved.</li><li><strong>Code agent guardrails:</strong> confirmation prompts for shell/destructive ops; folder-scoped file access.</li><li><strong>Telemetry:</strong> off by default; if added later, must be opt-in and anonymized.</li></ul>
+<hr>
+<h2 id="15-roadmap-phased"><span class="num">15</span>Roadmap (Phased)</h2>
+<ul><li><strong>Phase 0 - Foundation:</strong> Electron + Vite + React shell, design tokens, SQLite, settings, keychain, Ollama detection.</li><li><strong>Phase 1 - Chat + Models (MVP):</strong> Chat mode, Ollama provider, streaming + thinking, in-composer model switcher, mid-chat switching, Model Manager (pull/inspect/delete), cloud provider adapters.</li><li><strong>Phase 2 - Artifacts + Projects:</strong> artifact panel + persistence, Projects, Project -&gt; Folder materialization.</li><li><strong>Phase 3 - Code mode:</strong> file tree + Monaco + terminal + preview, coding agent loop, usage dashboard, routines.</li><li><strong>Phase 4 - Cowork + Connectors:</strong> agentic tasks, scheduled tasks (local), MCP connectors + permission model, live artifacts.</li><li><strong>Phase 5 - Optional Convex backend:</strong> auth, sync, server-run schedules, shared artifacts.</li><li><strong>Phase 6 - Polish:</strong> vision attachments, advanced hardware-fit guidance, accessibility pass, packaging/auto-update.</li></ul>
+<hr>
+<h2 id="16-open-questions-future-work"><span class="num">16</span>Open Questions &amp; Future Work</h2>
+<ul><li>Native inference engine (llama.cpp/GGUF) to drop the hard Ollama dependency.</li><li>LM Studio / other local runtimes as alternative engines behind the same abstraction.</li><li>Connector/skill marketplace.</li><li>Team/multi-user collaboration on top of Convex.</li><li>Mobile companion (read/triage, trigger tasks).</li></ul>
+<hr>
+<h2 id="appendix-a-ollama-api-reference-used-by-the-integration">Appendix A - Ollama API Reference (used by the integration)</h2>
+<ul><li>Base URL: <code>http://localhost:11434/api</code> (local), <code>https://ollama.com/api</code> (cloud <code>:cloud</code> tags).</li><li><code>GET /api/tags</code> - list installed models.</li><li><code>GET /api/ps</code> - list loaded (in-memory) models.</li><li><code>POST /api/show</code> - model details (params, template, license).</li><li><code>POST /api/pull</code> - download a model; ndjson streaming progress (<code>status</code>, <code>completed</code>, <code>total</code>).</li><li><code>POST /api/chat</code> - multi-turn chat; streaming ndjson; chunks expose <code>message.content</code>, <code>message.thinking</code>, <code>message.tool_calls</code>. Host executes tools and posts back a <code>role: "tool"</code> message.</li><li><code>POST /api/generate</code> - single-turn generation.</li><li><code>POST /api/embeddings</code> - embeddings.</li><li><code>DELETE /api/delete</code>, <code>POST /api/copy</code>, <code>POST /api/create</code>, <code>GET /api/version</code>.</li><li>Streaming is on by default over REST; disable with <code>"stream": false</code>.</li></ul>
+<h2 id="appendix-b-reference-apps-grounding">Appendix B - Reference Apps (grounding)</h2>
+<ul><li><strong>Claude Desktop:</strong> Chat / Cowork / Code modes, Projects, Artifacts, Connectors, Scheduled tasks, Design - the primary UX grounding.</li><li><strong>Ollama:</strong> local model pull/run/list - the local runtime and Model Manager grounding.</li><li><strong>Cursor / Codex (ChatGPT desktop):</strong> project-to-folder coding loop and connectors.</li><li><strong>Perplexity:</strong> fluid in-chat model switching.</li></ul>
+      <footer class="doc-footer">Demerzel (Demi) &middot; generated from PRD.md</footer>
+    </div>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (window.mermaid) {
+    mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'neutral', themeVariables: { primaryColor: '#EEF2FF', primaryBorderColor: '#4154D6', lineColor: '#6B7685', fontFamily: 'Inter, sans-serif' } });
+  }
+  // scroll-spy
+  const links = Array.from(document.querySelectorAll('.toc a'));
+  const map = new Map();
+  links.forEach(a => map.set(a.getAttribute('href').slice(1), a));
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = map.get(e.target.id);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '0px 0px -75% 0px', threshold: 0 });
+  document.querySelectorAll('h2[id], h3[id]').forEach(h => obs.observe(h));
+</script>
+</body>
+</html>

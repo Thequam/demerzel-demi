@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #FAFBFC;
+  --bg-subtle: #F2F4F6;
+  --surface: #FFFFFF;
+  --surface-raised: #FFFFFF;
+  --border: #E7EAEE;
+  --border-strong: #D6DBE1;
+  --text: #13171C;
+  --text-secondary: #4A5563;
+  --text-muted: #939DAA;
+  --primary: #4154D6;
+  --primary-hover: #3140B0;
+  --primary-fg: #FFFFFF;
+  --accent: #C29318;
+  --accent-fg: #13171C;
+  --link: #135BBF;
+  --success: #0FB39A;
+  --info: #1E6FE0;
+  --warning: #D6AC2E;
+  --error: #D64550;
+  --focus-ring: #3D8AF0;
+}
+
+[data-theme="dark"] {
+  --bg: #13171C;
+  --bg-subtle: #0B0E11;
+  --surface: #1E232A;
+  --surface-raised: #2B323B;
+  --border: #2B323B;
+  --border-strong: #39424E;
+  --text: #F2F4F6;
+  --text-secondary: #BBC2CB;
+  --text-muted: #6B7685;
+  --primary: #6478F5;
+  --primary-hover: #8FA3FF;
+  --primary-fg: #13171C;
+  --accent: #E3C158;
+  --accent-fg: #13171C;
+  --link: #6BA8FF;
+  --success: #54DCC6;
+  --info: #6BA8FF;
+  --warning: #E3C158;
+  --error: #E66670;
+  --focus-ring: #6BA8FF;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.6rem;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); background-clip: padding-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
