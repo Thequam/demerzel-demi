@@ -169,11 +169,11 @@ These map raw ramps to roles. Implement as CSS variables switched by `data-theme
 
 ### 3.1 Light theme
 ```
---bg                lg-50    #FAFBFC
---bg-subtle         lg-100   #F2F4F6
+--bg                canvas   #ECEEF1   (soft neutral gray canvas)
+--bg-subtle         canvas-  #E4E7EB   (a step darker for hover/subtle fills)
 --surface           white    #FFFFFF
 --surface-raised    white    #FFFFFF   (+ shadow)
---border            lg-200   #E7EAEE
+--border            edge     #DCE0E6
 --border-strong     lg-300   #D6DBE1
 --text              gun-900  #13171C
 --text-secondary    gun-500  #4A5563
@@ -192,6 +192,7 @@ These map raw ramps to roles. Implement as CSS variables switched by `data-theme
 --error             error-500 #D64550
 --focus-ring        teal-400 #1FACAC
 ```
+> **Light mode uses a soft gray canvas with white surfaces:** `--bg` is a soft neutral gray (`#ECEEF1`) so white `--surface` cards, panels, and the composer lift off the background; `--border` (`#DCE0E6`) keeps card edges legible against the grayer canvas. The user chat bubble is white (`bg-surface` + `border`) in light mode so it stays distinct from the gray canvas.
 > **Primary actions now use Demerzel Teal** (`#008B8B`), not royal/indigo. All `bg-primary` buttons and `text-primary` icons read teal. Gold remains the only attention accent.
 
 ### 3.2 Dark theme (metallic gunmetal)
@@ -311,7 +312,7 @@ shadow-glow 0 0 0 3px rgba(31,172,172,0.35)   (teal focus / active model chip)
 - VRAM-fit warning row uses `--warning`.
 
 ### 6.4 Chat bubbles
-- User: right-aligned, `gun-100` (light) / `gun-700` (dark) surface, `radius-lg`.
+- User: right-aligned, white `--surface` + `--border` (light) / `gun-700` (dark) surface, `radius-lg` — white in light mode so the bubble lifts off the gray canvas.
 - Assistant: left-aligned, transparent on `--bg`, full-width text column (max ~720px).
 - Per-message **model badge** (mono, muted) with tooltip showing provider + effort.
 - **Thinking trace:** collapsible block, cyan left-border, monospace, dimmed; auto-collapses when final answer starts.

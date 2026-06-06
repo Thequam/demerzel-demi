@@ -32,7 +32,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
   if (isUser) {
     return (
       <div className="flex justify-end animate-fade-in">
-        <div className="max-w-[80%] rounded-lg bg-gun-100 px-4 py-2.5 text-body text-text dark:bg-gun-700">
+        <div className="max-w-[80%] rounded-lg border border-border bg-surface px-4 py-2.5 text-body text-text dark:border-transparent dark:bg-gun-700">
           {message.content}
         </div>
       </div>
