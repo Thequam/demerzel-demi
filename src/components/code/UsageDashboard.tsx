@@ -3,10 +3,10 @@ import { cn, formatNumber } from "@/lib/utils";
 import { Card, Pill, ProgressBar, SectionLabel } from "@/components/ui";
 import { Activity, MessageSquare, Coins, CalendarDays, Flame, Clock } from "lucide-react";
 
-// royal -> azure -> cyan intensity ramp (index 1..4); 0 uses bg-bg-subtle
+// teal -> cyan intensity ramp (index 1..4); 0 uses bg-bg-subtle
 const HEAT_RAMP: Record<number, string> = {
-  1: "#26328C", // royal-700
-  2: "#135BBF", // azure-600
+  1: "#075C5C", // teal-700
+  2: "#008B8B", // teal-500
   3: "#1AC2E6", // cyan-400
   4: "#43D8F7", // cyan-300
 };

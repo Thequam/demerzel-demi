@@ -74,7 +74,7 @@ export function LeftRail() {
         <img
           src="/demi-logo.png"
           alt="Demerzel"
-          className="h-10 w-10 rounded-lg bg-white object-contain p-0.5 ring-1 ring-border"
+          className="h-10 w-10 rounded-lg bg-white object-contain p-0.5 ring-1 ring-brand-teal/40"
         />
         <div className="leading-tight">
           <div className="text-h3 font-bold tracking-tight">Demerzel</div>

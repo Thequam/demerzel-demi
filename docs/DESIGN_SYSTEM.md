@@ -178,8 +178,8 @@ These map raw ramps to roles. Implement as CSS variables switched by `data-theme
 --text              gun-900  #13171C
 --text-secondary    gun-500  #4A5563
 --text-muted        gun-300  #939DAA
---primary           royal-500 #4154D6
---primary-hover     royal-600 #3140B0
+--primary           teal-500 #008B8B
+--primary-hover     teal-600 #007373
 --primary-fg        white    #FFFFFF
 --accent            gold-500 #C29318
 --accent-fg         gun-900  #13171C
@@ -190,14 +190,15 @@ These map raw ramps to roles. Implement as CSS variables switched by `data-theme
 --info              azure-500 #1E6FE0
 --warning           gold-400 #D6AC2E
 --error             error-500 #D64550
---focus-ring        azure-400 #3D8AF0
+--focus-ring        teal-400 #1FACAC
 ```
+> **Primary actions now use Demerzel Teal** (`#008B8B`), not royal/indigo. All `bg-primary` buttons and `text-primary` icons read teal. Gold remains the only attention accent.
 
 ### 3.2 Dark theme (metallic gunmetal)
 The dark theme is tuned to read like cool brushed gunmetal: the grays are shifted slightly blue/steel and stacked into layered metal "plates" (base -> plate -> raised plate) rather than flat charcoal.
 ```
---bg                gunmetal-base    #161A20
---bg-subtle         gunmetal-deep    #0E1116
+--bg                gunmetal-base    #11151B   (darkened from #161A20)
+--bg-subtle         gunmetal-deep    #090C10   (darkened from #0E1116)
 --surface           gunmetal-plate   #20262E
 --surface-raised    gunmetal-raised  #2A323C
 --border            steel            #333C47
@@ -205,9 +206,9 @@ The dark theme is tuned to read like cool brushed gunmetal: the grays are shifte
 --text              lg-100           #F2F4F6
 --text-secondary    gun-200          #BBC2CB
 --text-muted        gun-400          #6B7685
---primary           royal-400        #6478F5
---primary-hover     royal-300        #8FA3FF
---primary-fg        gun-900          #13171C
+--primary           teal-400         #1FACAC   (bright teal, reads on gunmetal)
+--primary-hover     teal-300         #54C7C7
+--primary-fg        near-black-teal  #06201F   (dark fg on the bright teal button)
 --accent            gold-300         #E3C158
 --accent-fg         gun-900          #13171C
 --brand-teal        teal-400         #1FACAC   (brighter for contrast on gunmetal)
@@ -217,8 +218,9 @@ The dark theme is tuned to read like cool brushed gunmetal: the grays are shifte
 --info              azure-300 #6BA8FF
 --warning           gold-300 #E3C158
 --error             error-400 #E66670
---focus-ring        azure-300 #6BA8FF
+--focus-ring        teal-400 #1FACAC
 ```
+> **Primary actions now use Demerzel Teal** (bright `teal-400 #1FACAC` on gunmetal), not royal/indigo. Base backgrounds were darkened slightly (`--bg` -> `#11151B`, `--bg-subtle` -> `#090C10`) while surfaces stay lighter so the layered "plate" stacking still reads. `--text #F2F4F6` remains well above 4.5:1 on the darker `--bg`. Gold remains the only attention accent.
 
 ### 3.3 Signature gradients
 - **Brand gradient** (`bg-brand-gradient`): `linear-gradient(135deg, #4154D6 0%, #1E6FE0 50%, #43D8F7 100%)` (royal -> azure -> cyan). Use sparingly: onboarding headers, the model-switcher "active" glow, empty-state hero, artifact header bars.
@@ -272,13 +274,15 @@ radius-full 9999   (pills, avatars, model chip)
 shadow-sm   0 1px 2px rgba(19,23,28,0.06)
 shadow-md   0 4px 12px rgba(19,23,28,0.08)
 shadow-lg   0 12px 32px rgba(19,23,28,0.12)
-shadow-glow 0 0 0 3px rgba(61,138,240,0.35)   (focus / active model chip)
+shadow-glow 0 0 0 3px rgba(31,172,172,0.35)   (teal focus / active model chip)
 ```
 
-#### Brushed metal sheen (dark only)
-- `.metal-surface`: applies a very subtle top-light linear-gradient sheen plus a hairline inset top highlight to evoke brushed gunmetal. Active only under `[data-theme="dark"]`; it is a no-op in light mode.
-- `.metal-rail`: a faint vertical brushed variant for the left rail.
-- Keep these subtle. Dark elevation still leans primarily on `--surface-raised` + `--border`; the sheen is an accent on large metal "plates" (rail, composer, panel headers, raised cards), not something to apply everywhere. Do not stack it on small chips/badges.
+#### Brushed gunmetal texture (dark only)
+- `.metal-surface`: layers a very subtle top-light directional sheen over a faint **horizontal brushed-metal grain** (`repeating-linear-gradient` at ~0.012-0.02 alpha), plus a hairline inset top highlight, to evoke real brushed gunmetal. Active only under `[data-theme="dark"]`; it is a no-op in light mode.
+- `.metal-rail`: same idea tuned for the tall/narrow left rail - a faint directional sheen over a **vertical brushed grain** plus an inset edge shadow.
+- `.gunmetal-texture` (optional): the brushed grain only (no sheen, no shadow), dark-only. Layer it on cards or plates that want the grain without the directional sheen. Keep it subtle.
+- The brushed grain is built entirely from CSS gradients (no external assets), kept barely visible (alpha ~0.012-0.04), and is static so it respects `prefers-reduced-motion` by nature. No new shadows beyond the existing faint inset highlight.
+- Keep these subtle. Dark elevation still leans primarily on `--surface-raised` + `--border`; the sheen + grain are an accent on large metal "plates" (rail, composer, panel headers, raised cards), not something to apply everywhere. Do not stack it on small chips/badges.
 
 ### Motion
 - Durations: 120ms (micro), 200ms (default), 320ms (panel/overlay).

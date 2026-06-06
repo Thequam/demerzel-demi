@@ -94,7 +94,7 @@ export default {
         sm: "0 1px 2px rgba(19,23,28,0.06)",
         md: "0 4px 12px rgba(19,23,28,0.08)",
         lg: "0 12px 32px rgba(19,23,28,0.12)",
-        glow: "0 0 0 3px rgba(61,138,240,0.35)",
+        glow: "0 0 0 3px rgba(31,172,172,0.35)",
       },
       backgroundImage: {
         "brand-gradient": "linear-gradient(135deg, #4154D6 0%, #1E6FE0 50%, #43D8F7 100%)",

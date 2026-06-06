@@ -12,8 +12,8 @@
   --text: #13171C;
   --text-secondary: #4A5563;
   --text-muted: #939DAA;
-  --primary: #4154D6;
-  --primary-hover: #3140B0;
+  --primary: #008B8B;
+  --primary-hover: #007373;
   --primary-fg: #FFFFFF;
   --accent: #C29318;
   --accent-fg: #13171C;
@@ -24,12 +24,12 @@
   --info: #1E6FE0;
   --warning: #D6AC2E;
   --error: #D64550;
-  --focus-ring: #3D8AF0;
+  --focus-ring: #1FACAC;
 }
 
 [data-theme="dark"] {
-  --bg: #161A20;
-  --bg-subtle: #0E1116;
+  --bg: #11151B;
+  --bg-subtle: #090C10;
   --surface: #20262E;
   --surface-raised: #2A323C;
   --border: #333C47;
@@ -37,9 +37,9 @@
   --text: #F2F4F6;
   --text-secondary: #BBC2CB;
   --text-muted: #6B7685;
-  --primary: #6478F5;
-  --primary-hover: #8FA3FF;
-  --primary-fg: #13171C;
+  --primary: #1FACAC;
+  --primary-hover: #54C7C7;
+  --primary-fg: #06201F;
   --accent: #E3C158;
   --accent-fg: #13171C;
   --brand-teal: #1FACAC;
@@ -49,7 +49,7 @@
   --info: #6BA8FF;
   --warning: #E3C158;
   --error: #E66670;
-  --focus-ring: #6BA8FF;
+  --focus-ring: #1FACAC;
 }
 
 * {
@@ -93,23 +93,50 @@ body {
 }
 
 [data-theme="dark"] .metal-surface {
-  background-image: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.04) 0%,
-    rgba(255, 255, 255, 0) 18%,
-    rgba(0, 0, 0, 0.1) 100%
-  );
+  /* Soft directional sheen on top of a faint horizontal brushed grain. */
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0) 18%,
+      rgba(0, 0, 0, 0.1) 100%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.015) 0 1px,
+      rgba(0, 0, 0, 0.02) 1px 2px
+    );
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 [data-theme="dark"] .metal-rail {
-  background-image: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.03) 0%,
-    rgba(255, 255, 255, 0) 40%,
-    rgba(0, 0, 0, 0.08) 100%
-  );
+  /* Soft directional sheen on top of a faint vertical brushed grain. */
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      rgba(255, 255, 255, 0) 40%,
+      rgba(0, 0, 0, 0.08) 100%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.015) 0 1px,
+      rgba(0, 0, 0, 0.02) 1px 2px
+    );
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.18);
+}
+
+/* Optional reusable brushed grain only (no sheen, no shadow). Dark-only. */
+.gunmetal-texture {
+  background-image: none;
+}
+
+[data-theme="dark"] .gunmetal-texture {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.015) 0 1px,
+    rgba(0, 0, 0, 0.02) 1px 2px
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {
