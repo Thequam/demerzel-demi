@@ -278,12 +278,13 @@ shadow-lg   0 12px 32px rgba(19,23,28,0.12)
 shadow-glow 0 0 0 3px rgba(31,172,172,0.35)   (teal focus / active model chip)
 ```
 
-#### Brushed gunmetal texture (dark only)
-- `.metal-surface`: layers a very subtle top-light directional sheen over a faint **horizontal brushed-metal grain** (`repeating-linear-gradient` at ~0.012-0.02 alpha), plus a hairline inset top highlight, to evoke real brushed gunmetal. Active only under `[data-theme="dark"]`; it is a no-op in light mode.
-- `.metal-rail`: same idea tuned for the tall/narrow left rail - a faint directional sheen over a **vertical brushed grain** plus an inset edge shadow.
-- `.gunmetal-texture` (optional): the brushed grain only (no sheen, no shadow), dark-only. Layer it on cards or plates that want the grain without the directional sheen. Keep it subtle.
-- The brushed grain is built entirely from CSS gradients (no external assets), kept barely visible (alpha ~0.012-0.04), and is static so it respects `prefers-reduced-motion` by nature. No new shadows beyond the existing faint inset highlight.
-- Keep these subtle. Dark elevation still leans primarily on `--surface-raised` + `--border`; the sheen + grain are an accent on large metal "plates" (rail, composer, panel headers, raised cards), not something to apply everywhere. Do not stack it on small chips/badges.
+#### Smooth gunmetal finish (dark only)
+- The gunmetal treatment is built from **smooth gradients only** - there is no 1px `repeating-linear-gradient` grain. Earlier drafts used a hairline brushed grain, but at 1px it read as noise/banding rather than premium metal, so it was removed in favor of a quiet, low-contrast brushed-panel look.
+- `.metal-surface` (horizontal top bar): a soft **top-down sheen** - a gentle highlight near the top edge fading through neutral to a slightly darker base - layered over a faint cool **steel tint**. A tasteful bevel completes it: a 1px inset top highlight (`inset 0 1px 0 rgba(255,255,255,0.05)`) plus a soft inner bottom shadow. Active only under `[data-theme="dark"]`; a no-op in light mode.
+- `.metal-rail` (tall/narrow left rail): a soft **diagonal sheen** (~105deg) so light reads as coming from the top-left and fades to a slightly darker far edge, over the same faint steel tint, with a 1px inset top highlight and an inset right-edge shadow.
+- `.gunmetal-texture` (optional): just the smooth top-down sheen (no bevel shadow), dark-only. Layer it on cards or plates that want the metallic sheen without the panel bevel. Keep it subtle.
+- All layers are pure CSS gradients (no external assets) with low alphas (~0.012-0.07) so text/icons stay readable; they are static and respect `prefers-reduced-motion` by nature. The surface color tokens (`--surface #20262E`, `--surface-raised #2A323C`) are unchanged - the finish only adds a sheen.
+- Keep these subtle. Dark elevation still leans primarily on `--surface-raised` + `--border`; the sheen is an accent on large metal "plates" (rail, composer, panel headers, raised cards), not something to apply everywhere. Do not stack it on small chips/badges.
 
 ### Motion
 - Durations: 120ms (micro), 200ms (default), 320ms (panel/overlay).

@@ -86,56 +86,66 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); background-clip: padding-box; }
 
-/* Brushed gunmetal sheen for dark mode surfaces. No-op in light mode. */
+/* Smooth gunmetal finish for dark mode surfaces. No-op in light mode. */
 .metal-surface,
 .metal-rail {
   background-image: none;
 }
 
 [data-theme="dark"] .metal-surface {
-  /* Soft directional sheen on top of a faint horizontal brushed grain. */
+  /* Brushed gunmetal panel: a quiet top-down sheen (gentle highlight near the
+     top edge fading to a slightly darker base) layered over a faint cool steel
+     tint. No 1px grain — pure smooth gradients. */
   background-image:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.04) 0%,
-      rgba(255, 255, 255, 0) 18%,
-      rgba(0, 0, 0, 0.1) 100%
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.018) 14%,
+      rgba(0, 0, 0, 0) 52%,
+      rgba(0, 0, 0, 0.06) 100%
     ),
-    repeating-linear-gradient(
-      0deg,
-      rgba(255, 255, 255, 0.015) 0 1px,
-      rgba(0, 0, 0, 0.02) 1px 2px
+    linear-gradient(
+      180deg,
+      rgba(150, 178, 205, 0.05) 0%,
+      rgba(120, 140, 165, 0) 60%
     );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -10px 18px -12px rgba(0, 0, 0, 0.35);
 }
 
 [data-theme="dark"] .metal-rail {
-  /* Soft directional sheen on top of a faint vertical brushed grain. */
+  /* Tall left rail: a soft diagonal sheen so light reads from the top-left and
+     fades to a slightly darker far edge, over a faint cool steel tint. */
   background-image:
     linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.03) 0%,
-      rgba(255, 255, 255, 0) 40%,
-      rgba(0, 0, 0, 0.08) 100%
+      105deg,
+      rgba(255, 255, 255, 0.045) 0%,
+      rgba(255, 255, 255, 0.012) 22%,
+      rgba(0, 0, 0, 0) 58%,
+      rgba(0, 0, 0, 0.07) 100%
     ),
-    repeating-linear-gradient(
+    linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.015) 0 1px,
-      rgba(0, 0, 0, 0.02) 1px 2px
+      rgba(150, 178, 205, 0.05) 0%,
+      rgba(120, 140, 165, 0) 55%
     );
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    inset -1px 0 0 rgba(0, 0, 0, 0.18);
 }
 
-/* Optional reusable brushed grain only (no sheen, no shadow). Dark-only. */
+/* Optional reusable smooth gunmetal sheen (no bevel shadow). Dark-only. */
 .gunmetal-texture {
   background-image: none;
 }
 
 [data-theme="dark"] .gunmetal-texture {
-  background-image: repeating-linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.015) 0 1px,
-    rgba(0, 0, 0, 0.02) 1px 2px
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0) 45%,
+    rgba(0, 0, 0, 0.05) 100%
   );
 }
 
