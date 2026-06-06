@@ -35,3 +35,6 @@ Thumbs.db
 # Emitted from composite tsc build of vite.config.ts
 vite.config.js
 vite.config.d.ts
+
+# Temp commit message scratch file
+COMMIT_MSG.tmp
