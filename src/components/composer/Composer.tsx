@@ -14,6 +14,7 @@ export function Composer({ placeholder = "Message Demi…" }: { placeholder?: st
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const sendMessage = useAppStore((s) => s.sendMessage);
+  const stopGeneration = useAppStore((s) => s.stopGeneration);
   const streaming = useAppStore((s) => s.streamingConvoId != null);
 
   const submit = (text?: string) => {
@@ -61,12 +62,13 @@ export function Composer({ placeholder = "Message Demi…" }: { placeholder?: st
             <div className="ml-auto flex items-center gap-2">
               <ModelSwitcher />
               <button
-                onClick={() => submit()}
-                disabled={!canSend}
-                aria-label="Send message"
+                onClick={() => (streaming ? stopGeneration() : submit())}
+                disabled={!streaming && !canSend}
+                aria-label={streaming ? "Stop generating" : "Send message"}
+                title={streaming ? "Stop generating" : "Send message"}
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-full transition-colors",
-                  canSend
+                  streaming || canSend
                     ? "bg-primary text-primary-fg hover:bg-primary-hover"
                     : "bg-bg-subtle text-text-muted"
                 )}

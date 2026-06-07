@@ -18,12 +18,22 @@ import {
   connectors as seedConnectors,
   canvasDocs as seedCanvasDocs,
 } from "@/data/mock";
+import * as ollama from "@/lib/ollama";
+import { pullCatalog } from "@/data/catalog";
 
 type Theme = "light" | "dark";
 type ThemePref = "light" | "dark" | "system";
+type OllamaStatus = "unknown" | "checking" | "online" | "offline";
 
 let idCounter = 0;
 const uid = (p: string) => `${p}-${Date.now().toString(36)}-${(idCounter++).toString(36)}`;
+
+/** Active streaming request, so the composer's Stop button can cancel it. */
+let chatAbort: AbortController | null = null;
+/** Active pull requests keyed by tag, so a pull can be cancelled. */
+const pullAborts: Record<string, AbortController> = {};
+
+const friendlyName = (tag: string) => tag.replace(/:latest$/i, "");
 
 interface AppState {
   /* ---- theme ---- */
@@ -43,6 +53,7 @@ interface AppState {
   createConversation: () => void;
   sendMessage: (text: string) => void;
   streamingConvoId: string | null;
+  stopGeneration: () => void;
 
   /* ---- model selection ---- */
   activeModelId: string;
@@ -56,8 +67,16 @@ interface AppState {
   models: Model[];
   pulling: Record<string, number>;
   pullModel: (id: string) => void;
+  pullTag: (tag: string) => void;
+  cancelPull: (id: string) => void;
   setModelLoaded: (id: string, loaded: boolean) => void;
   deleteModel: (id: string) => void;
+
+  /* ---- ollama connection ---- */
+  ollamaStatus: OllamaStatus;
+  ollamaVersion?: string;
+  ollamaInstalled: string[];
+  refreshOllama: () => Promise<void>;
 
   /* ---- cowork tasks ---- */
   tasks: ScheduledTask[];
@@ -69,6 +88,8 @@ interface AppState {
   connectors: Connector[];
   toggleConnector: (id: string) => void;
   setToolPolicy: (connectorId: string, toolName: string, policy: Policy) => void;
+  addConnector: (input: { name: string; url: string; transport: "http" | "sse"; description?: string }) => void;
+  removeConnector: (id: string) => void;
 
   /* ---- settings ---- */
   localOnly: boolean;
@@ -208,6 +229,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     const model = get().models.find((m) => m.id === modelId);
     const modelName = model?.name ?? modelId;
 
+    // Conversation history (before this turn) for real chat context.
+    const priorConvo = get().conversations.find((c) => c.id === convoId);
+    const history: ollama.ChatRole[] = (priorConvo?.messages ?? [])
+      .filter((m) => m.content.trim().length > 0)
+      .map((m) => ({ role: m.role, content: m.content }));
+
     const userMsg: ChatMessage = {
       id: uid("m"),
       role: "user",
@@ -215,9 +242,107 @@ export const useAppStore = create<AppState>((set, get) => ({
       createdAt: new Date(),
     };
 
-    const { thinking, text: replyText, canvas } = buildResponse(trimmed, modelName);
+    // Decide path: real Ollama if it's online AND this model is installed locally.
+    const useReal =
+      get().ollamaStatus === "online" &&
+      model?.kind === "local" &&
+      get().ollamaInstalled.includes(modelId);
 
     const assistantId = uid("m");
+
+    /** Patch the streaming assistant message in place. */
+    const patch = (fields: Partial<ChatMessage>, finished = false) =>
+      set((s) => ({
+        streamingConvoId: finished ? null : s.streamingConvoId,
+        conversations: s.conversations.map((c) =>
+          c.id === convoId
+            ? {
+                ...c,
+                messages: c.messages.map((m) =>
+                  m.id === assistantId ? { ...m, ...fields } : m
+                ),
+              }
+            : c
+        ),
+      }));
+
+    if (useReal) {
+      const assistantMsg: ChatMessage = {
+        id: assistantId,
+        role: "assistant",
+        content: "",
+        thinking: "",
+        modelId,
+        effort,
+        createdAt: new Date(),
+        streaming: true,
+      };
+      set((s) => ({
+        streamingConvoId: convoId,
+        conversations: s.conversations.map((c) =>
+          c.id === convoId
+            ? {
+                ...c,
+                title: c.messages.length === 0 ? trimmed.slice(0, 40) : c.title,
+                updatedAt: new Date(),
+                messages: [...c.messages, userMsg, assistantMsg],
+              }
+            : c
+        ),
+      }));
+
+      chatAbort = new AbortController();
+      const wantThinking =
+        !!model?.capabilities.includes("thinking") && effort !== "Low";
+
+      ollama
+        .chat(
+          get().ollamaBaseUrl,
+          {
+            model: modelId,
+            messages: [...history, { role: "user", content: trimmed }],
+            think: wantThinking,
+          },
+          {
+            signal: chatAbort.signal,
+            onThinking: (t) =>
+              patch({ thinking: (get().conversations
+                .find((c) => c.id === convoId)
+                ?.messages.find((m) => m.id === assistantId)?.thinking ?? "") + t }),
+            onToken: (t) =>
+              patch({ content: (get().conversations
+                .find((c) => c.id === convoId)
+                ?.messages.find((m) => m.id === assistantId)?.content ?? "") + t }),
+          }
+        )
+        .then(() => patch({ streaming: false }, true))
+        .catch((err) => {
+          if (chatAbort?.signal.aborted) {
+            patch({ streaming: false }, true);
+            return;
+          }
+          patch(
+            {
+              streaming: false,
+              content:
+                (get().conversations
+                  .find((c) => c.id === convoId)
+                  ?.messages.find((m) => m.id === assistantId)?.content ?? "") +
+                `\n\n_(Ollama request failed: ${
+                  err instanceof Error ? err.message : String(err)
+                }. Check that Ollama is running and OLLAMA_ORIGINS allows this origin.)_`,
+            },
+            true
+          );
+        })
+        .finally(() => {
+          chatAbort = null;
+        });
+      return;
+    }
+
+    // ---- Mock fallback (no Ollama / cloud model / not installed) ----
+    const { thinking, text: replyText, canvas } = buildResponse(trimmed, modelName);
     const assistantMsg: ChatMessage = {
       id: assistantId,
       role: "assistant",
@@ -245,26 +370,14 @@ export const useAppStore = create<AppState>((set, get) => ({
       ),
     }));
 
-    // Stream the reply token by token
     const tokens = replyText.match(/\S+\s*/g) ?? [replyText];
     let i = 0;
     const tick = () => {
+      if (get().streamingConvoId !== convoId) return; // stopped
       i += 1;
       const partial = tokens.slice(0, i).join("");
       const done = i >= tokens.length;
-      set((s) => ({
-        conversations: s.conversations.map((c) =>
-          c.id === convoId
-            ? {
-                ...c,
-                messages: c.messages.map((m) =>
-                  m.id === assistantId ? { ...m, content: partial, streaming: !done } : m
-                ),
-              }
-            : c
-        ),
-        streamingConvoId: done ? null : s.streamingConvoId,
-      }));
+      patch({ content: partial, streaming: !done }, done);
       if (!done) {
         setTimeout(tick, 22);
       } else if (canvas) {
@@ -272,6 +385,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
     };
     setTimeout(tick, 180);
+  },
+  stopGeneration: () => {
+    if (chatAbort) chatAbort.abort();
+    set({ streamingConvoId: null });
   },
 
   /* ---- model selection ---- */
@@ -286,42 +403,117 @@ export const useAppStore = create<AppState>((set, get) => ({
   /* ---- model manager ---- */
   models: seedModels,
   pulling: {},
-  pullModel: (id) => {
-    if (get().pulling[id] != null) return;
-    set((s) => ({ pulling: { ...s.pulling, [id]: 0 } }));
-    const step = () => {
-      const cur = get().pulling[id];
-      if (cur == null) return;
-      const next = Math.min(100, cur + Math.random() * 14 + 6);
-      if (next >= 100) {
-        set((s) => {
-          const { [id]: _removed, ...rest } = s.pulling;
-          return {
-            pulling: rest,
-            models: s.models.map((m) =>
-              m.id === id ? { ...m, installState: "installed" } : m
-            ),
-          };
-        });
-      } else {
-        set((s) => ({ pulling: { ...s.pulling, [id]: next } }));
-        setTimeout(step, 280);
-      }
-    };
-    setTimeout(step, 280);
+  pullModel: (id) => runPull(id, id),
+  pullTag: (rawTag) => {
+    const tag = friendlyName(rawTag.trim());
+    if (!tag) return;
+    // Ensure a card exists for this tag so progress is visible immediately.
+    set((s) => {
+      if (s.models.some((m) => m.id === tag)) return {};
+      const cat = pullCatalog.find((c) => c.tag === tag || c.tag === `${tag}:latest`);
+      const newModel: Model = {
+        id: tag,
+        name: tag,
+        provider: "Ollama",
+        kind: "local",
+        params: cat ? cat.label.split("·")[1]?.trim() ?? "—" : "—",
+        context: "—",
+        capabilities: ["tools"],
+        installState: "available",
+        sizeBytes: cat?.sizeBytes ?? 0,
+        description: cat?.blurb,
+      };
+      return { models: [newModel, ...s.models] };
+    });
+    runPull(tag, tag);
   },
-  setModelLoaded: (id, loaded) =>
+  cancelPull: (id) => {
+    pullAborts[id]?.abort();
+    delete pullAborts[id];
+    set((s) => {
+      const { [id]: _removed, ...rest } = s.pulling;
+      return { pulling: rest };
+    });
+  },
+  setModelLoaded: (id, loaded) => {
     set((s) => ({
       models: s.models.map((m) =>
         m.id === id ? { ...m, installState: loaded ? "loaded" : "installed" } : m
       ),
-    })),
-  deleteModel: (id) =>
+    }));
+    // Best-effort real load: a tiny generate call warms the model into memory.
+    if (loaded && get().ollamaStatus === "online" && get().ollamaInstalled.includes(id)) {
+      fetch(`${ollama.normalizeBase(get().ollamaBaseUrl)}/api/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: id, prompt: "", stream: false }),
+      }).catch(() => {});
+    }
+  },
+  deleteModel: (id) => {
+    const online = get().ollamaStatus === "online" && get().ollamaInstalled.includes(id);
+    if (online) {
+      ollama
+        .deleteModel(get().ollamaBaseUrl, id)
+        .then(() => get().refreshOllama())
+        .catch(() => {});
+    }
     set((s) => ({
       models: s.models.map((m) =>
         m.id === id ? { ...m, installState: "available" } : m
       ),
-    })),
+    }));
+  },
+
+  /* ---- ollama connection ---- */
+  ollamaStatus: "unknown",
+  ollamaVersion: undefined,
+  ollamaInstalled: [],
+  refreshOllama: async () => {
+    set({ ollamaStatus: "checking" });
+    const { online, version } = await ollama.ping(get().ollamaBaseUrl);
+    if (!online) {
+      set({ ollamaStatus: "offline", ollamaVersion: undefined });
+      return;
+    }
+    let installed: string[] = [];
+    try {
+      const tags = await ollama.listModels(get().ollamaBaseUrl);
+      installed = tags.map((t) => friendlyName(t.name));
+      // Merge real installed models into the catalog so they show as loaded/installed.
+      set((s) => {
+        const existing = new Set(s.models.map((m) => m.id));
+        const additions: Model[] = tags
+          .filter((t) => !existing.has(friendlyName(t.name)))
+          .map((t) => ({
+            id: friendlyName(t.name),
+            name: friendlyName(t.name),
+            provider: "Ollama",
+            kind: "local" as const,
+            params: t.details?.parameter_size ?? "—",
+            context: "—",
+            quant: t.details?.quantization_level,
+            capabilities: ["tools"] as Model["capabilities"],
+            installState: "installed" as const,
+            sizeBytes: t.size ?? 0,
+          }));
+        const installedSet = new Set(installed);
+        return {
+          models: [
+            ...additions,
+            ...s.models.map((m) =>
+              m.kind === "local" && installedSet.has(m.id) && m.installState === "available"
+                ? { ...m, installState: "installed" as const }
+                : m
+            ),
+          ],
+        };
+      });
+    } catch {
+      /* tags failed but server is up */
+    }
+    set({ ollamaStatus: "online", ollamaVersion: version, ollamaInstalled: installed });
+  },
 
   /* ---- cowork tasks ---- */
   tasks: seedTasks,
@@ -392,6 +584,21 @@ export const useAppStore = create<AppState>((set, get) => ({
           : k
       ),
     })),
+  addConnector: ({ name, url, transport, description }) => {
+    const connector: Connector = {
+      id: uid("k"),
+      name: name.trim() || "Custom connector",
+      transport,
+      url: url.trim(),
+      description: description?.trim() || undefined,
+      enabled: true,
+      custom: true,
+      tools: [],
+    };
+    set((s) => ({ connectors: [...s.connectors, connector] }));
+  },
+  removeConnector: (id) =>
+    set((s) => ({ connectors: s.connectors.filter((k) => k.id !== id) })),
 
   /* ---- settings ---- */
   localOnly: false,
@@ -413,7 +620,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   telemetry: false,
   setTelemetry: (v) => set({ telemetry: v }),
   ollamaBaseUrl: "http://localhost:11434/api",
-  setOllamaBaseUrl: (v) => set({ ollamaBaseUrl: v }),
+  setOllamaBaseUrl: (v) => {
+    set({ ollamaBaseUrl: v });
+    void get().refreshOllama();
+  },
   providerKeys: {},
   setProviderKey: (provider, key) =>
     set((s) => ({ providerKeys: { ...s.providerKeys, [provider]: key } })),
@@ -426,3 +636,83 @@ export const useAppStore = create<AppState>((set, get) => ({
   activeCanvasId: seedCanvasDocs[0]?.id ?? null,
   setActiveCanvas: (id) => set({ activeCanvasId: id, canvasPanelOpen: id != null }),
 }));
+
+/**
+ * Pull a model by tag. Uses the real Ollama `/api/pull` stream when the server
+ * is online; otherwise falls back to a simulated progress animation so the UI
+ * still demonstrates the flow.
+ */
+function runPull(tag: string, key: string) {
+  const store = useAppStore;
+  if (store.getState().pulling[key] != null) return;
+  store.setState((s) => ({ pulling: { ...s.pulling, [key]: 0 } }));
+
+  const markInstalled = (loaded: boolean) =>
+    store.setState((s) => {
+      const { [key]: _removed, ...rest } = s.pulling;
+      return {
+        pulling: rest,
+        ollamaInstalled: s.ollamaInstalled.includes(tag)
+          ? s.ollamaInstalled
+          : [...s.ollamaInstalled, tag],
+        models: s.models.map((m) =>
+          m.id === key
+            ? { ...m, installState: loaded ? "loaded" : "installed" }
+            : m
+        ),
+      };
+    });
+
+  const dropPull = () =>
+    store.setState((s) => {
+      const { [key]: _removed, ...rest } = s.pulling;
+      return { pulling: rest };
+    });
+
+  if (store.getState().ollamaStatus === "online") {
+    const ctrl = new AbortController();
+    pullAborts[key] = ctrl;
+    ollama
+      .pullModel(store.getState().ollamaBaseUrl, tag, {
+        signal: ctrl.signal,
+        onProgress: (p) => {
+          store.setState((s) => {
+            const prev = s.pulling[key] ?? 0;
+            // Indeterminate phases (manifest/verify) report no total — inch forward.
+            const next = p.percent >= 0 ? p.percent : Math.max(prev, 1);
+            return { pulling: { ...s.pulling, [key]: next } };
+          });
+        },
+      })
+      .then(() => {
+        markInstalled(true);
+        void store.getState().refreshOllama();
+      })
+      .catch(() => {
+        dropPull();
+      })
+      .finally(() => {
+        delete pullAborts[key];
+      });
+    return;
+  }
+
+  // ---- Simulated fallback ----
+  const step = () => {
+    const cur = store.getState().pulling[key];
+    if (cur == null) return;
+    const next = Math.min(100, cur + Math.random() * 14 + 6);
+    if (next >= 100) {
+      markInstalled(false);
+    } else {
+      store.setState((s) => ({ pulling: { ...s.pulling, [key]: next } }));
+      setTimeout(step, 280);
+    }
+  };
+  setTimeout(step, 280);
+}
+
+// Detect a local Ollama server on startup (and let the UI react to the result).
+if (typeof window !== "undefined") {
+  void useAppStore.getState().refreshOllama();
+}

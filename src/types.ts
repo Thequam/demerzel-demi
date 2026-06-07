@@ -120,10 +120,18 @@ export interface ConnectorTool {
   policy: Policy;
 }
 
+export type ConnectorTransport = "stdio" | "http" | "sse";
+
 export interface Connector {
   id: string;
   name: string;
-  transport: "stdio" | "http";
+  transport: ConnectorTransport;
   enabled: boolean;
   tools: ConnectorTool[];
+  url?: string;
+  description?: string;
+  /** User-added connector (vs. the seeded examples). */
+  custom?: boolean;
+  /** Reachability of a remote (http/sse) connector. */
+  reachable?: boolean;
 }

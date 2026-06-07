@@ -28,6 +28,7 @@ export function ModelCard({
 }) {
   const pct = useAppStore((s) => s.pulling[model.id]);
   const pullModel = useAppStore((s) => s.pullModel);
+  const cancelPull = useAppStore((s) => s.cancelPull);
   const setModelLoaded = useAppStore((s) => s.setModelLoaded);
   const deleteModel = useAppStore((s) => s.deleteModel);
 
@@ -123,13 +124,23 @@ export function ModelCard({
               />
               Pulling…
             </span>
-            <span className="font-mono tabular text-text-secondary">{Math.round(pct)}%</span>
+            <span className="flex items-center gap-2">
+              <span className="font-mono tabular text-text-secondary">{Math.round(pct)}%</span>
+              <button
+                onClick={() => cancelPull(model.id)}
+                className="text-text-muted underline-offset-2 hover:text-danger hover:underline"
+              >
+                Cancel
+              </button>
+            </span>
           </div>
           <ProgressBar value={pct} color={LIVE_CYAN} />
-          <div className="font-mono tabular text-caption text-text-muted">
-            {formatBytes((model.sizeBytes * pct) / 100)} / {formatBytes(model.sizeBytes)} ·{" "}
-            {formatEta(model.sizeBytes, pct)}
-          </div>
+          {model.sizeBytes > 0 && (
+            <div className="font-mono tabular text-caption text-text-muted">
+              {formatBytes((model.sizeBytes * pct) / 100)} / {formatBytes(model.sizeBytes)} ·{" "}
+              {formatEta(model.sizeBytes, pct)}
+            </div>
+          )}
         </div>
       )}
 

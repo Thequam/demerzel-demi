@@ -1,7 +1,8 @@
 import { useAppStore } from "@/store/useAppStore";
-import { IconButton, Badge } from "@/components/ui";
+import { IconButton } from "@/components/ui";
+import { cn } from "@/lib/utils";
 import type { View } from "@/types";
-import { Sun, Moon, PanelRight, Wifi } from "lucide-react";
+import { Sun, Moon, PanelRight, Wifi, WifiOff, Loader2 } from "lucide-react";
 
 const titles: Record<View, string> = {
   chat: "Chat",
@@ -23,6 +24,37 @@ const subtitles: Partial<Record<View, string>> = {
   customize: "Providers, connectors, appearance, and privacy",
 };
 
+function OllamaStatus() {
+  const status = useAppStore((s) => s.ollamaStatus);
+  const version = useAppStore((s) => s.ollamaVersion);
+  const refresh = useAppStore((s) => s.refreshOllama);
+
+  const config = {
+    unknown: { icon: <Wifi size={11} />, label: "Ollama", color: "var(--text-muted)" },
+    checking: { icon: <Loader2 size={11} className="animate-spin" />, label: "Connecting…", color: "var(--text-muted)" },
+    online: { icon: <Wifi size={11} />, label: version ? `Ollama ${version}` : "Ollama online", color: "var(--success)" },
+    offline: { icon: <WifiOff size={11} />, label: "Ollama offline", color: "var(--warning)" },
+  }[status];
+
+  return (
+    <button
+      onClick={() => void refresh()}
+      title={
+        status === "online"
+          ? "Connected to local Ollama — click to refresh"
+          : "Ollama not detected — click to retry. Start Ollama and set OLLAMA_ORIGINS to allow this origin."
+      }
+      className={cn(
+        "hidden items-center gap-1.5 rounded-full border border-border bg-bg-subtle px-2.5 py-1 text-caption font-medium text-text-secondary transition-colors hover:bg-surface sm:inline-flex"
+      )}
+    >
+      <span className="flex h-1.5 w-1.5 rounded-full" style={{ background: config.color }} aria-hidden />
+      {config.icon}
+      {config.label}
+    </button>
+  );
+}
+
 export function TopBar() {
   const { view, theme, toggleTheme, canvasPanelOpen, toggleCanvasPanel } = useAppStore();
 
@@ -36,9 +68,7 @@ export function TopBar() {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        <Badge className="hidden sm:inline-flex" dotColor="var(--success)">
-          <Wifi size={11} /> Ollama · localhost:11434
-        </Badge>
+        <OllamaStatus />
         {view === "chat" && (
           <IconButton
             active={canvasPanelOpen}

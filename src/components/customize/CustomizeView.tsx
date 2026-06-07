@@ -4,6 +4,7 @@ import { useAppStore } from "@/store/useAppStore";
 import {
   Card,
   Badge,
+  Button,
   SegmentedControl,
   SectionLabel,
   Toggle,
@@ -19,6 +20,11 @@ import {
   Cpu,
   KeyRound,
   WifiOff,
+  Wifi,
+  Plus,
+  Trash2,
+  Info,
+  Loader2,
 } from "lucide-react";
 
 const GUN = "#6B7685";
@@ -134,7 +140,13 @@ function ProvidersPanel() {
 function OllamaPanel() {
   const ollamaBaseUrl = useAppStore((s) => s.ollamaBaseUrl);
   const setOllamaBaseUrl = useAppStore((s) => s.setOllamaBaseUrl);
+  const status = useAppStore((s) => s.ollamaStatus);
+  const version = useAppStore((s) => s.ollamaVersion);
+  const installed = useAppStore((s) => s.ollamaInstalled);
+  const refresh = useAppStore((s) => s.refreshOllama);
   const [autoStart, setAutoStart] = useState(true);
+
+  const online = status === "online";
 
   return (
     <div>
@@ -143,6 +155,38 @@ function OllamaPanel() {
         description="Local runtime connection and hardware detection."
       />
       <div className="flex flex-col gap-4">
+        <Card className="flex items-center justify-between gap-3 p-4">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-2 text-body font-medium text-text">
+              {online ? (
+                <Wifi size={15} aria-hidden style={{ color: "var(--success)" }} />
+              ) : status === "checking" ? (
+                <Loader2 size={15} aria-hidden className="animate-spin" />
+              ) : (
+                <WifiOff size={15} aria-hidden style={{ color: "var(--warning)" }} />
+              )}
+              {online
+                ? `Connected · Ollama ${version ?? ""}`
+                : status === "checking"
+                ? "Checking connection…"
+                : "Not connected"}
+            </div>
+            <div className="text-caption text-text-muted">
+              {online
+                ? `${installed.length} model${installed.length === 1 ? "" : "s"} installed locally.`
+                : "Start Ollama and set OLLAMA_ORIGINS to allow this origin."}
+            </div>
+          </div>
+          <Button variant="secondary" size="sm" onClick={() => void refresh()}>
+            {status === "checking" ? (
+              <Loader2 size={14} aria-hidden className="animate-spin" />
+            ) : (
+              <Wifi size={14} aria-hidden />
+            )}
+            Test connection
+          </Button>
+        </Card>
+
         <div>
           <SectionLabel className="mb-1.5">Base URL</SectionLabel>
           <TextInput
@@ -152,7 +196,8 @@ function OllamaPanel() {
           />
           <p className="mt-1.5 text-caption text-text-muted">
             Point at a remote host, or use{" "}
-            <span className="font-mono">https://ollama.com/api</span> for cloud tags.
+            <span className="font-mono">https://ollama.com/api</span> for cloud tags. For browser
+            access set <span className="font-mono">OLLAMA_ORIGINS</span> to allow this origin.
           </p>
         </div>
 
@@ -321,47 +366,148 @@ function ConnectorCard({
   connector,
   onToggleEnabled,
   onSetPolicy,
+  onRemove,
 }: {
   connector: Connector;
   onToggleEnabled: () => void;
   onSetPolicy: (toolName: string, policy: Policy) => void;
+  onRemove?: () => void;
 }) {
   const readOnly = connector.tools.filter((t) => t.readOnly);
   const writeTools = connector.tools.filter((t) => !t.readOnly);
+  const isLocal = connector.transport === "stdio";
 
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between gap-3">
-        <div className="inline-flex items-center gap-2">
-          <span className="text-body font-medium text-text">{connector.name}</span>
-          <Badge dotColor={connector.transport === "http" ? "var(--info)" : "var(--success)"}>
-            {connector.transport}
-          </Badge>
+        <div className="min-w-0">
+          <div className="inline-flex items-center gap-2">
+            <span className="text-body font-medium text-text">{connector.name}</span>
+            <Badge dotColor={isLocal ? "var(--success)" : "var(--info)"}>
+              {connector.transport}
+            </Badge>
+            {connector.custom && <Badge>custom</Badge>}
+          </div>
+          {connector.url && (
+            <div className="truncate font-mono text-caption text-text-muted">{connector.url}</div>
+          )}
         </div>
-        <Toggle
-          checked={connector.enabled}
-          onChange={onToggleEnabled}
-          label={`Enable ${connector.name}`}
-        />
+        <div className="flex items-center gap-2">
+          <Toggle
+            checked={connector.enabled}
+            onChange={onToggleEnabled}
+            label={`Enable ${connector.name}`}
+          />
+          {onRemove && (
+            <button
+              onClick={onRemove}
+              aria-label={`Remove ${connector.name}`}
+              title="Remove connector"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-bg-subtle hover:text-danger"
+            >
+              <Trash2 size={15} aria-hidden />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className={cn("mt-3 flex flex-col gap-3", !connector.enabled && "opacity-50")}>
-        {readOnly.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <SectionLabel>Read-only tools</SectionLabel>
-            {readOnly.map((t) => (
-              <ToolRow key={t.name} tool={t} onChange={(p) => onSetPolicy(t.name, p)} />
-            ))}
+        {connector.tools.length === 0 ? (
+          <div className="flex items-start gap-2 rounded-md border border-border bg-bg-subtle px-3 py-2.5 text-caption text-text-secondary">
+            <Info size={13} className="mt-0.5 shrink-0" aria-hidden />
+            {isLocal
+              ? "Local (stdio) servers run via the Demi desktop host; tools appear here once it connects."
+              : "Tools are discovered from the MCP server on first connect. Permissions will appear here."}
           </div>
+        ) : (
+          <>
+            {readOnly.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <SectionLabel>Read-only tools</SectionLabel>
+                {readOnly.map((t) => (
+                  <ToolRow key={t.name} tool={t} onChange={(p) => onSetPolicy(t.name, p)} />
+                ))}
+              </div>
+            )}
+            {writeTools.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <SectionLabel>State-changing tools · needs approval</SectionLabel>
+                {writeTools.map((t) => (
+                  <ToolRow key={t.name} tool={t} onChange={(p) => onSetPolicy(t.name, p)} />
+                ))}
+              </div>
+            )}
+          </>
         )}
-        {writeTools.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <SectionLabel>State-changing tools · needs approval</SectionLabel>
-            {writeTools.map((t) => (
-              <ToolRow key={t.name} tool={t} onChange={(p) => onSetPolicy(t.name, p)} />
-            ))}
-          </div>
-        )}
+      </div>
+    </Card>
+  );
+}
+
+function AddConnectorForm() {
+  const addConnector = useAppStore((s) => s.addConnector);
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [url, setUrl] = useState("");
+  const [transport, setTransport] = useState<"http" | "sse">("http");
+
+  const valid = name.trim().length > 0 && /^https?:\/\//.test(url.trim());
+
+  const submit = () => {
+    if (!valid) return;
+    addConnector({ name, url, transport });
+    setName("");
+    setUrl("");
+    setTransport("http");
+    setOpen(false);
+  };
+
+  if (!open) {
+    return (
+      <Button variant="secondary" onClick={() => setOpen(true)}>
+        <Plus size={15} aria-hidden /> Add custom connector
+      </Button>
+    );
+  }
+
+  return (
+    <Card className="flex flex-col gap-3 p-4">
+      <div className="flex items-center gap-2">
+        <Plug size={15} className="text-primary" aria-hidden />
+        <span className="text-small font-semibold text-text">New MCP connector</span>
+      </div>
+      <div className="flex flex-col gap-2">
+        <SectionLabel>Name</SectionLabel>
+        <TextInput value={name} onChange={setName} placeholder="e.g. Notion" ariaLabel="Connector name" />
+      </div>
+      <div className="flex flex-col gap-2">
+        <SectionLabel>Server URL (remote MCP over HTTP/SSE)</SectionLabel>
+        <TextInput
+          value={url}
+          onChange={setUrl}
+          placeholder="https://mcp.example.com/sse"
+          ariaLabel="Connector URL"
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <SectionLabel>Transport</SectionLabel>
+        <SegmentedControl<"http" | "sse">
+          size="sm"
+          value={transport}
+          onChange={setTransport}
+          options={[
+            { value: "http", label: "Streamable HTTP" },
+            { value: "sse", label: "SSE" },
+          ]}
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <Button onClick={submit} disabled={!valid}>
+          Add connector
+        </Button>
+        <Button variant="ghost" onClick={() => setOpen(false)}>
+          Cancel
+        </Button>
       </div>
     </Card>
   );
@@ -371,13 +517,22 @@ function ConnectorsPanel() {
   const connectors = useAppStore((s) => s.connectors);
   const toggleConnector = useAppStore((s) => s.toggleConnector);
   const setToolPolicy = useAppStore((s) => s.setToolPolicy);
+  const removeConnector = useAppStore((s) => s.removeConnector);
 
   return (
     <div>
       <PanelHeader
         title="Connectors (MCP)"
-        description="Manage MCP servers and set per-tool Allow / Ask / Deny permissions."
+        description="Connect MCP servers for tools, and set per-tool Allow / Ask / Deny permissions."
       />
+      <div className="mb-4 flex items-start gap-2 rounded-md border border-border bg-bg-subtle px-3 py-2.5 text-caption text-text-secondary">
+        <Info size={14} className="mt-0.5 shrink-0" aria-hidden />
+        <span>
+          Remote MCP servers (HTTP/SSE) can be added here and reached directly. Local{" "}
+          <span className="font-mono">stdio</span> servers (Filesystem, Postgres, …) require the Demi
+          desktop host to spawn the process — they're shown as examples in the browser build.
+        </span>
+      </div>
       <div className="flex flex-col gap-4">
         {connectors.map((c) => (
           <ConnectorCard
@@ -385,8 +540,10 @@ function ConnectorsPanel() {
             connector={c}
             onToggleEnabled={() => toggleConnector(c.id)}
             onSetPolicy={(toolName, policy) => setToolPolicy(c.id, toolName, policy)}
+            onRemove={c.custom ? () => removeConnector(c.id) : undefined}
           />
         ))}
+        <AddConnectorForm />
       </div>
     </div>
   );
