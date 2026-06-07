@@ -26,9 +26,9 @@ export default {
           800: "#064E60", 900: "#053744",
         },
         teal: {
-          50: "#E6F7F7", 100: "#C2ECEC", 200: "#8FDCDC", 300: "#54C7C7",
-          400: "#1FACAC", 500: "#008B8B", 600: "#007373", 700: "#075C5C",
-          800: "#094A4A", 900: "#0A3838",
+          50: "#E6F4F4", 100: "#C2E6E6", 200: "#8FD0D0", 300: "#54B5B5",
+          400: "#1F9494", 500: "#005F5F", 600: "#004F4F", 700: "#003F3F",
+          800: "#002F2F", 900: "#001F1F",
         },
         gun: {
           50: "#F1F3F5", 100: "#DDE1E6", 200: "#BBC2CB", 300: "#939DAA",
@@ -94,11 +94,11 @@ export default {
         sm: "0 1px 2px rgba(19,23,28,0.06)",
         md: "0 4px 12px rgba(19,23,28,0.08)",
         lg: "0 12px 32px rgba(19,23,28,0.12)",
-        glow: "0 0 0 3px rgba(31,172,172,0.35)",
+        glow: "0 0 0 3px rgba(31,148,148,0.35)",
       },
       backgroundImage: {
         "brand-gradient": "linear-gradient(135deg, #4154D6 0%, #1E6FE0 50%, #43D8F7 100%)",
-        "brand-gradient-teal": "linear-gradient(135deg, #008B8B 0%, #0FB39A 50%, #43D8F7 100%)",
+        "brand-gradient-teal": "linear-gradient(135deg, #005F5F 0%, #0FB39A 50%, #43D8F7 100%)",
       },
       transitionTimingFunction: {
         enter: "cubic-bezier(0.2, 0, 0, 1)",

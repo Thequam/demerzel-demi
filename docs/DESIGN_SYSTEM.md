@@ -24,16 +24,16 @@ Demi's palette: **primary = Demerzel Teal (the logo/brand lead) + a family of bl
 ### 2.1 Primary - Demerzel Teal (lead brand / logo color)
 The signature color of the Demerzel logo and Demi's primary brand accent.
 ```
-teal-50    #E6F7F7
-teal-100   #C2ECEC
-teal-200   #8FDCDC
-teal-300   #54C7C7
-teal-400   #1FACAC
-teal-500   #008B8B   <- base (brand / logo)
-teal-600   #007373
-teal-700   #075C5C
-teal-800   #094A4A
-teal-900   #0A3838
+teal-50    #E6F4F4
+teal-100   #C2E6E6
+teal-200   #8FD0D0
+teal-300   #54B5B5
+teal-400   #1F9494
+teal-500   #005F5F   <- base (brand / logo) - deep, muted Demerzel Teal
+teal-600   #004F4F
+teal-700   #003F3F
+teal-800   #002F2F
+teal-900   #001F1F
 ```
 
 ### 2.2 Primary - Royal Blue (lead brand color)
@@ -92,7 +92,7 @@ cyan-800   #064E60
 cyan-900   #053744
 ```
 
-> Brand/blue usage order: **Teal** (`#008B8B`) = the lead brand and logo color, used for primary brand identity moments and the new teal gradient. **Royal** = brand / primary actions. **Azure** = informational, links, secondary actions. **Turquoise** = success / "local model" accent. **Cyan** = highlights, data viz, "live"/streaming states. Used together the blues form Demi's signature gradient: `royal-500 -> azure-500 -> cyan-400`; the teal-led variant is `teal-500 -> turq-500 -> cyan-300` (see 3.3).
+> Brand/blue usage order: **Teal** (`#005F5F`) = the lead brand and logo color, used for primary brand identity moments and the new teal gradient. **Royal** = brand / primary actions. **Azure** = informational, links, secondary actions. **Turquoise** = success / "local model" accent. **Cyan** = highlights, data viz, "live"/streaming states. Used together the blues form Demi's signature gradient: `royal-500 -> azure-500 -> cyan-400`; the teal-led variant is `teal-500 -> turq-500 -> cyan-300` (see 3.3).
 
 ### 2.6 Secondary - Gunmetal Gray
 ```
@@ -178,22 +178,22 @@ These map raw ramps to roles. Implement as CSS variables switched by `data-theme
 --text              gun-900  #13171C
 --text-secondary    gun-500  #4A5563
 --text-muted        gun-300  #939DAA
---primary           teal-500 #008B8B
---primary-hover     teal-600 #007373
+--primary           teal-500 #005F5F
+--primary-hover     teal-600+ #004A4A
 --primary-fg        white    #FFFFFF
 --accent            gold-500 #C29318
 --accent-fg         gun-900  #13171C
---brand-teal        teal-500 #008B8B
+--brand-teal        teal-500 #005F5F
 --brand-teal-fg     white    #FFFFFF
 --link              azure-600 #135BBF
 --success           turq-500 #0FB39A
 --info              azure-500 #1E6FE0
 --warning           gold-400 #D6AC2E
 --error             error-500 #D64550
---focus-ring        teal-400 #1FACAC
+--focus-ring        teal-400 #1F9494
 ```
 > **Light mode uses a soft gray canvas with white surfaces:** `--bg` is a soft neutral gray (`#ECEEF1`) so white `--surface` cards, panels, and the composer lift off the background; `--border` (`#DCE0E6`) keeps card edges legible against the grayer canvas. The user chat bubble is white (`bg-surface` + `border`) in light mode so it stays distinct from the gray canvas.
-> **Primary actions now use Demerzel Teal** (`#008B8B`), not royal/indigo. All `bg-primary` buttons and `text-primary` icons read teal. Gold remains the only attention accent.
+> **Primary actions now use Demerzel Teal** (`#005F5F`, the deeper re-anchored brand teal), not royal/indigo. White `--primary-fg` on `#005F5F` clears WCAG AA (~7.5:1). All `bg-primary` buttons and `text-primary` icons read teal. Gold remains the only attention accent.
 
 ### 3.2 Dark theme (metallic gunmetal)
 The dark theme is tuned to read like cool brushed gunmetal: the grays are shifted slightly blue/steel and stacked into layered metal "plates" (base -> plate -> raised plate) rather than flat charcoal.
@@ -207,25 +207,25 @@ The dark theme is tuned to read like cool brushed gunmetal: the grays are shifte
 --text              lg-100           #F2F4F6
 --text-secondary    gun-200          #BBC2CB
 --text-muted        gun-400          #6B7685
---primary           teal-400         #1FACAC   (bright teal, reads on gunmetal)
---primary-hover     teal-300         #54C7C7
+--primary           teal-400         #1F9494   (brighter teal, reads on gunmetal)
+--primary-hover     teal-300         #54B5B5
 --primary-fg        near-black-teal  #06201F   (dark fg on the bright teal button)
 --accent            gold-300         #E3C158
 --accent-fg         gun-900          #13171C
---brand-teal        teal-400         #1FACAC   (brighter for contrast on gunmetal)
---brand-teal-fg     teal-900         #0A3838
+--brand-teal        teal-400         #1F9494   (brighter for contrast on gunmetal)
+--brand-teal-fg     teal-900         #001F1F
 --link              azure-300        #6BA8FF
 --success           turq-300 #54DCC6
 --info              azure-300 #6BA8FF
 --warning           gold-300 #E3C158
 --error             error-400 #E66670
---focus-ring        teal-400 #1FACAC
+--focus-ring        teal-400 #1F9494
 ```
-> **Primary actions now use Demerzel Teal** (bright `teal-400 #1FACAC` on gunmetal), not royal/indigo. Base backgrounds were darkened slightly (`--bg` -> `#11151B`, `--bg-subtle` -> `#090C10`) while surfaces stay lighter so the layered "plate" stacking still reads. `--text #F2F4F6` remains well above 4.5:1 on the darker `--bg`. Gold remains the only attention accent.
+> **Primary actions now use Demerzel Teal.** Because the re-anchored brand teal (`teal-500 #005F5F`) is too dark to lift off the gunmetal `--bg`, dark mode keeps a brighter `teal-400 #1F9494` as a glowing teal accent (option a), paired with a dark `--primary-fg #06201F` (~4.6:1 button text, ~5:1 on `--bg`). The solid `#005F5F` stays the canonical light-mode/brand anchor. Base backgrounds were darkened slightly (`--bg` -> `#11151B`, `--bg-subtle` -> `#090C10`) while surfaces stay lighter so the layered "plate" stacking still reads. `--text #F2F4F6` remains well above 4.5:1 on the darker `--bg`. Gold remains the only attention accent.
 
 ### 3.3 Signature gradients
 - **Brand gradient** (`bg-brand-gradient`): `linear-gradient(135deg, #4154D6 0%, #1E6FE0 50%, #43D8F7 100%)` (royal -> azure -> cyan). Use sparingly: onboarding headers, the model-switcher "active" glow, empty-state hero, artifact header bars.
-- **Teal brand gradient** (`bg-brand-gradient-teal`): `linear-gradient(135deg, #008B8B 0%, #0FB39A 50%, #43D8F7 100%)` (teal -> turquoise -> cyan). Demi's logo-led identity gradient; use for brand moments where the Demerzel Teal should lead (brand headers, splash, account/brand marks). Same "use sparingly" rule applies.
+- **Teal brand gradient** (`bg-brand-gradient-teal`): `linear-gradient(135deg, #005F5F 0%, #0FB39A 50%, #43D8F7 100%)` (deep teal -> turquoise -> cyan). Demi's logo-led identity gradient; use for brand moments where the Demerzel Teal should lead (brand headers, splash, account/brand marks). Same "use sparingly" rule applies.
 
 ---
 
@@ -275,7 +275,7 @@ radius-full 9999   (pills, avatars, model chip)
 shadow-sm   0 1px 2px rgba(19,23,28,0.06)
 shadow-md   0 4px 12px rgba(19,23,28,0.08)
 shadow-lg   0 12px 32px rgba(19,23,28,0.12)
-shadow-glow 0 0 0 3px rgba(31,172,172,0.35)   (teal focus / active model chip)
+shadow-glow 0 0 0 3px rgba(31,148,148,0.35)   (teal focus / active model chip; teal-400 #1F9494)
 ```
 
 #### Smooth gunmetal finish (dark only)
